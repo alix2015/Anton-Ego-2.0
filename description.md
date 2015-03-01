@@ -35,20 +35,27 @@ For this project, we will use
 
 ### Process
 A high-level description of the investigation process is the following:
+
 1.	Acquiring the data, explore, and clean it.  
 	In particular, very short reviews will be discarded to reduce noise.
 	Subdivision of the data may be useful: we will assess the relevance
 	of this practice.
+
 2.	Using the set of reviews hence extracted, we will perform topic
 	extraction (e. g. with non-negative matrix factorization).
+
 3.	Labelling the extracted topics into categories of interest.
+
 4.	Parse the review into snippets (the precise definition of which
 	will be evaluated) and calculate the weight vector of each snippet
 	in the topic space.
+
 5.	Extracting for each category the most prominent features hierarchically
 	ordered alng the granularity deduced in 2.
+
 6.	Further proceed to a sentiment analysis on each snippet, hence producing
 	a qualitative rating.
+
 7.	Building a UI to show results (e. g. using Flask)
 
 Nota: 3-4-5-7 can be iteratively carried out to deliver intermediate working
