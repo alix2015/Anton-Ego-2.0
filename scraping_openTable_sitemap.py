@@ -33,13 +33,14 @@ def get_resto_data(url):
         raw = response.text
         soup = BeautifulSoup(raw, 'html.parser')
         data = soup.find('span', id='ReviewsDataStore')
-        profile_url = data['data-restprofilenlurl']
-        review_cnt = data['data-writtenreviewcount']
-        page_cnt = data['data-totalpages']
-        rid = data['data-rid']
-        rest_name = data['data-restaurantname']
+        if data:
+            profile_url = data['data-restprofilenlurl']
+            review_cnt = data['data-writtenreviewcount']
+            page_cnt = data['data-totalpages']
+            rid = data['data-rid']
+            rest_name = data['data-restaurantname']
 
-        return profile_url, rid, rest_name, review_cnt, page_cnt
+            return profile_url, rid, rest_name, review_cnt, page_cnt
 
 
 def scrape_reviews(profile_url,
@@ -69,15 +70,41 @@ def scrape_reviews(profile_url,
 if __name__ == '__main__':
     client = MongoClient()
     db = client.opentable
-    coll = db.test
+    coll = db.review
 
 # url = 'http://www.opentable.com/rest_profile_reviews.aspx?rid=99991&tab=2'
-    for i in xrange(1, 22):
-        urls = get_resto_links(i)
-        time(0.1)
+    # for i in xrange(1, 5):
+    #     'Obtaining restaurants links from page %d' % i
+    #     urls = get_resto_links(i)
+    #     time.sleep(0.1)
 
-        for url in urls:
-            tup = get_resto_data(url)
+    #     count = 0
+    #     for url in urls:
+    #         if not (count % 10):
+    #             print 'Scraped %d restaurants' % count
+    #         tup = get_resto_data(url)
+    #         profile_url, rid, rest_name, review_cnt, page_cnt = tup
+
+    #         scrape_reviews(profile_url,
+    #                        rid,
+    #                        rest_name, 
+    #                        review_cnt, 
+    #                        page_cnt, 
+    #                        coll)
+    #         count += 1
+    #         time.sleep(1)
+    'Obtaining restaurants links from page %d' % 1
+    urls = get_resto_links(1)
+    time.sleep(0.1)
+
+    count = 0
+    problem = []
+    for url in urls[425:]:
+        if not (count % 10):
+            print '###############################'
+            print 'Scraped %d restaurants' % count
+        tup = get_resto_data(url)
+        if tup:
             profile_url, rid, rest_name, review_cnt, page_cnt = tup
 
             scrape_reviews(profile_url,
@@ -86,4 +113,10 @@ if __name__ == '__main__':
                            review_cnt, 
                            page_cnt, 
                            coll)
-            time(0.8)
+            count += 1
+        else:
+            problem.append(url)
+
+        time.sleep(1)
+
+    print problem
