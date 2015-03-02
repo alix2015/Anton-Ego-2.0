@@ -1,2 +1,2 @@
-# Anton-Ego-2.0
+# The Critic
 Restaurant reviews analysis and aggregation
