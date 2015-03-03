@@ -35,7 +35,10 @@ def get_resto_data(url):
         data = soup.find('span', id='ReviewsDataStore')
         if data:
             profile_url = data['data-restprofilenlurl']
-            review_cnt = data['data-writtenreviewcount']
+            try:
+                review_cnt = data['data-writtenreviewcount']
+            except KeyError:
+                review_cnt = 0
             page_cnt = data['data-totalpages']
             rid = data['data-rid']
             rest_name = data['data-restaurantname']
@@ -48,7 +51,8 @@ def scrape_reviews(profile_url,
                    rest_name,
                    review_cnt,
                    page_cnt,
-                   collection):
+                   collection,
+                   pb):
     print 'Scraping %s' % rest_name
     
     if review_cnt:
@@ -57,20 +61,26 @@ def scrape_reviews(profile_url,
                 print 'Review page %d' % (p + 1)
             url = profile_url + '?rid=' + rid + '&tab=2&page=' + str(p + 1)
             # print url
-            response = requests.get(url)
-            # print response.status_code
-            
-            if response.status_code == 200:
-                collection.insert({'url': response.url,
-                                  'rest_name': rest_name,
-                                  'rid': rid,
-                                  'html': response.content})
-            time.sleep(0.5)
+            try:
+                response = requests.get(url) 
+                # print response.status_code
+                
+                if response.status_code == 200:
+                    collection.insert({'url': response.url,
+                                      'rest_name': rest_name,
+                                      'rid': rid,
+                                      'html': response.content})
+                time.sleep(0.5)
+            except requests.exceptions.RequestException:
+                time.sleep(5)
+                pb.insert({'url': profile_url})
+
 
 if __name__ == '__main__':
     client = MongoClient()
     db = client.opentable
     coll = db.review
+    pb = db.problem
 
 # url = 'http://www.opentable.com/rest_profile_reviews.aspx?rid=99991&tab=2'
     # for i in xrange(1, 5):
@@ -98,8 +108,7 @@ if __name__ == '__main__':
     time.sleep(0.1)
 
     count = 0
-    problem = []
-    for url in urls[425:]:
+    for url in urls[2768:]:
         if not (count % 10):
             print '###############################'
             print 'Scraped %d restaurants' % count
@@ -112,11 +121,10 @@ if __name__ == '__main__':
                            rest_name, 
                            review_cnt, 
                            page_cnt, 
-                           coll)
+                           coll,
+                           pb)
             count += 1
         else:
-            problem.append(url)
+            pb.insert({'url': url})
 
         time.sleep(1)
-
-    print problem
