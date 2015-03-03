@@ -111,9 +111,8 @@ class extract_data(object):
 
 
 if __name__ == '__main__':
-    filename = '../data/reviews.pkl'
-    filename = '../data/test.pkl'
-
+    filename = '../data/reviews_SF.pkl'
+    
     ed = extract_data()
 
     df = ed.to_dataframe(filename)
