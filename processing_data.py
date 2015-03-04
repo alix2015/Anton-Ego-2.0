@@ -11,72 +11,8 @@ from sklearn.metrics import precision_score, recall_score, accuracy_score
 from wordcloud import WordCloud
 # from sklearn.pipeline import Pipeline
 # import cPickle as pickle
+import dill
 
-
-class EDA(object):
-    def __init__(self, verbose=True, figsize=(10, 8)):
-        self.verbose = verbose
-        self.figsize = figsize
-
-    def review_size_distribution(self, df, filename):
-        '''
-        INPUT: pandas dataframe
-        OUTPUT: none
-        Plot the review size distribution for the entire corpus
-        '''
-        plt.figure(figsize=self.figsize)
-        df['review_lengths'].hist(bins=100)
-        plt.xlabel('Review length')
-        plt.ylabel('Number of reviews')
-        plt.title('Review length distribution')
-        plt.savefig(filename + '.png')
-
-        if self.verbose:
-            print 'Review length statistics'
-            print df['review_lengths'].describe()
-
-    def ratings_distribution(self, df, filename):
-        plt.figure(figsize=self.figsize)
-        df['ratings'].hist(bins=20)
-        plt.xlabel('Rating')
-        plt.ylabel('Number of reviews')
-        plt.title('Overall rating distribution')
-        plt.savefig(filename + '_overall.png')
-
-        plt.figure(figsize=self.figsize)
-        df['food_rating'].hist(bins=20)
-        plt.xlabel('Rating')
-        plt.ylabel('Number of reviews')
-        plt.title('Food rating distribution')
-        plt.savefig(filename + '_food.png')
-
-        plt.figure(figsize=self.figsize)
-        df['service_rating'].hist(bins=20)
-        plt.xlabel('Rating')
-        plt.ylabel('Number of reviews')
-        plt.title('Service rating distribution')
-        plt.savefig(filename + '_service.png')
-
-        plt.figure(figsize=self.figsize)
-        df['ambience_rating'].hist(bins=20)
-        plt.xlabel('Rating')
-        plt.ylabel('Number of reviews')
-        plt.title('Ambience rating distribution')
-        plt.savefig(filename + '_ambience.png')
-
-        if self.verbose:
-            print 'Ratings statistics:'
-            print 'Overall'
-            print df['ratings'].describe()
-            print '-------------------'
-            print 'Food'
-            print df['food_rating'].describe()
-            print '-------------------'
-            print 'Service'
-            print df['service_rating'].describe()
-            print '-------------------'
-            print 'Ambience'
-            print df['ambience_rating'].describe()
 
 
 class TopicExtraction(object):
@@ -97,10 +33,11 @@ class TopicExtraction(object):
                                           ngram_range=self.ngram_range)
         self.factorizor = NMF(n_components=self.n_topics,
                               max_iter=self.max_iter)
+        self.trained = False
         self.H_ = None
         self.fonts_ = '/Library/Fonts/Georgia.ttf'
         self.wordcloud = WordCloud(font_path=self.fonts_)
-        self.top_words = None
+        
 
     def my_tokenize(self, text):
         '''
@@ -123,11 +60,17 @@ class TopicExtraction(object):
         V = self.vectorizer.fit_transform(texts)
         W = self.factorizor.fit_transform(V)
         self.H_ = self.factorizor.components_
+        self.trained = True
         
         return W
 
-    def top_words(self, texts, top_n=10, top_filename, wordcloud=False):
-        self.fit_transform(texts)
+    def extract_top_words(self,
+                          texts,
+                          top_n=10,
+                          top_filename=None,
+                          wordcloud=False):
+        if not self.trained:
+            self.fit_transform(texts)
         top_words = {}
         for topic in xrange(self.n_topics):
             top_words_idx = np.argsort(self.H_[topic, :])[-1:-(top_n + 1):-1]
@@ -140,8 +83,6 @@ class TopicExtraction(object):
                 plt.axis('off')
                 plt.savefig('../data/wordcloud_%d.png' % topic)
         
-        self.top_words = top_words
-
         if top_filename:
             with open(top_filename, 'w') as f:
                 f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
@@ -162,17 +103,48 @@ class TopicExtraction(object):
 
         return top_words
 
-    def extract_nouns(self, sentence):
-        '''
-        Only keep nouns for each line
-        '''
-        # Getting rid of non_ascii characters
-        text = nltk.word_tokenize(re.sub(r'[^\x00-\x7F]+', ' ', sentence))
-        word_tags = nltk.pos_tag(text)
-        
-        return ' '.join([word_tag[0] for 
-                        word_tag in word_tags if 
-                        word_tag[1][:2] == 'NN'])
+        def extract_cat_top(self,
+                            texts,
+                            top_n=10,
+                            )
+
+
+def build_data(filenames, min_rev_len=0):
+    df_list = []
+    for file in filenames:
+        df_list.append(pd.read_pickle(file))
+
+    df = pd.concat(df_list)
+    df = df.drop_duplicates('reviews')
+
+    df = df[df['review_lengths'] > min_rev_len]
+
+    return df
+
+def build_model(df,
+                n_topics,
+                ngram_range,
+                max_words,
+                max_iter,
+                top_filename,
+                model_filename):
+    
+    te = TopicExtraction(n_topics=n_topics,
+                         sentence=True,
+                         ngram_range=ngram_range,
+                         max_words=max_words,
+                         max_iter=max_iter)
+
+    top_words = te.extract_top_words(df['reviews'],
+                                     top_n=15)
+                                     # top_filename=top_filename,
+                                     # wordcloud=True)
+
+    if model_filename:
+        with open(model_filename, 'w') as f:
+            dill.dump(te, f)
+            print 'Finished pickling the model'
+    return te
 
 
 
@@ -180,40 +152,18 @@ if __name__ == '__main__':
     data_SF = '../data/reviews_SF.pkl'
     data_1 = '../data/reviews_1.pkl'
     data_2 = '../data/reviews_2.pkl'
-    
-    df_SF = pd.read_pickle(data_SF)
-    df1 = pd.read_pickle(data_1)
-    df2 = pd.read_pickle(data_2)
 
-    df = pd.concat([df_SF, df1, df2])
-    df = df.drop_duplicates('reviews')
+    df =  build_data([data_SF, data_1, data_2], min_rev_len=100)
 
-    # length_distribution_filename = '../data/length_distribution'
-    # ratings_filename = '../data/ratings_distribution'
-    # eda = EDA()
-    # eda.review_size_distribution(df, length_distribution_filename)
-    # eda.ratings_distribution(df, ratings_filename)
-    
-    Getting rid of short reviews (< 100 characters)
-    df = df[df['review_lengths'] > 100]   
-    
     n_topics = 100
     ngram_range = (2, 2)
     max_words = 5000
     max_iter = 400
 
-    # top_filename = '../data/topics_%d_%dgram_max_%d_lg_d.txt' % (n_topics,
-    #                                                              ngram_range[1],
-    #                                                              max_words)
+    top_filename = '../data/topics_%d_%dgram_max_%d_100_s.txt' % \
+                    (n_topics, ngram_range[1], max_words)
 
-    # te = TopicExtraction(n_topics=n_topics,
-    #                      ngram_range=ngram_range,
-    #                      max_words=max_words,
-    #                      max_iter=max_iter)
-
-    top_filename = '../data/topics_%d_%dgram_max_%d_100_s.txt' % (n_topics,
-                                                                  ngram_range[1],
-                                                                  max_words)
+    model_filename = '../data/topics_1.pkl'
 
     te = TopicExtraction(n_topics=n_topics,
                          sentence=True,
@@ -221,7 +171,12 @@ if __name__ == '__main__':
                          max_words=max_words,
                          max_iter=max_iter)
 
-    top_words = te.top_words(df['reviews'],
-                             top_n=15,
-                             top_filename=top_filename,
-                             wordcloud=True)
+    top_words = te.extract_top_words(df['reviews'],
+                                     top_n=15,
+                                     top_filename=top_filename,
+                                     wordcloud=False)
+
+    # Pickling does not work as such due to my_tokenize
+    te = build_model(df, n_topics, ngram_range, max_words, max_iter, 
+                     top_filename, model_filename)
+    
