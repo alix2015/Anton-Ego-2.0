@@ -10,7 +10,7 @@ class extract_data(object):
     def __init__(self):
         self.client = MongoClient()
         self.db = self.client.opentable
-        self.collection = self.db.reviews
+        self.collection = self.db.review
 
     def to_dataframe(self, filename):
         '''
@@ -111,7 +111,7 @@ class extract_data(object):
 
 
 if __name__ == '__main__':
-    filename = '../data/reviews_SF.pkl'
+    filename = '../data/reviews_1.pkl'
     
     ed = extract_data()
 

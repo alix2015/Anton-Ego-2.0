@@ -26,24 +26,28 @@ def get_resto_links(n):
 # Informations can be found in the span.ReviewsDataStore options
 
 def get_resto_data(url):
-    response = requests.get(url)
-    if response.status_code != 200:
-        print 'WARNING', response.status_code
-    else:
-        raw = response.text
-        soup = BeautifulSoup(raw, 'html.parser')
-        data = soup.find('span', id='ReviewsDataStore')
-        if data:
-            profile_url = data['data-restprofilenlurl']
-            try:
-                review_cnt = data['data-writtenreviewcount']
-            except KeyError:
-                review_cnt = 0
-            page_cnt = data['data-totalpages']
-            rid = data['data-rid']
-            rest_name = data['data-restaurantname']
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            print 'WARNING', response.status_code
+        else:
+            raw = response.text
+            soup = BeautifulSoup(raw, 'html.parser')
+            data = soup.find('span', id='ReviewsDataStore')
+            if data:
+                profile_url = data['data-restprofilenlurl']
+                try:
+                    review_cnt = data['data-writtenreviewcount']
+                except KeyError:
+                    review_cnt = 0
+                page_cnt = data['data-totalpages']
+                rid = data['data-rid']
+                rest_name = data['data-restaurantname']
 
-            return profile_url, rid, rest_name, review_cnt, page_cnt
+                return profile_url, rid, rest_name, review_cnt, page_cnt
+    except requests.exceptions.RequestException:
+        time.sleep(5)
+        pb.insert({'url': url})
 
 
 def scrape_reviews(profile_url,
@@ -79,7 +83,7 @@ def scrape_reviews(profile_url,
 if __name__ == '__main__':
     client = MongoClient()
     db = client.opentable
-    coll = db.review
+    coll = db.review3
     pb = db.problem
 
 # url = 'http://www.opentable.com/rest_profile_reviews.aspx?rid=99991&tab=2'
@@ -104,11 +108,11 @@ if __name__ == '__main__':
     #         count += 1
     #         time.sleep(1)
     'Obtaining restaurants links from page %d' % 1
-    urls = get_resto_links(1)
+    urls = get_resto_links(3)
     time.sleep(0.1)
 
     count = 0
-    for url in urls[2768:]:
+    for url in urls:
         if not (count % 10):
             print '###############################'
             print 'Scraped %d restaurants' % count
