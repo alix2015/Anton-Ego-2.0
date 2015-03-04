@@ -98,6 +98,9 @@ class TopicExtraction(object):
         self.factorizor = NMF(n_components=self.n_topics,
                               max_iter=self.max_iter)
         self.H_ = None
+        self.fonts_ = '/Library/Fonts/Georgia.ttf'
+        self.wordcloud = WordCloud(font_path=self.fonts_)
+        self.top_words = None
 
     def my_tokenize(self, text):
         '''
@@ -123,14 +126,40 @@ class TopicExtraction(object):
         
         return W
 
-    def top_words(self, texts, top_n=10):
+    def top_words(self, texts, top_n=10, top_filename, wordcloud=False):
         self.fit_transform(texts)
         top_words = {}
         for topic in xrange(self.n_topics):
             top_words_idx = np.argsort(self.H_[topic, :])[-1:-(top_n + 1):-1]
             top_words[topic] = [self.vectorizer.get_feature_names()[i] for
                                 i in top_words_idx]
+            if wordcloud:
+                wordcloud = self.wordcloud.generate(' '.join(top_words[topic]))
+                plt.figure(figsize=(10, 8))
+                plt.imshow(wordcloud)
+                plt.axis('off')
+                plt.savefig('../data/wordcloud_%d.png' % topic)
         
+        self.top_words = top_words
+
+        if top_filename:
+            with open(top_filename, 'w') as f:
+                f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
+                f.write('\n')
+                f.write('n_topics: %d' % n_topics)
+                f.write('\n')
+                f.write('-------------------------')
+                f.write('\n')
+                for topic in top_words:
+                    f.write('Topic %d' % topic)
+                    f.write('\n')
+                    for word in top_words[topic]:
+                        f.write(word)
+                        f.write('\n')
+                    f.write('-------------------------')
+                    f.write('\n')
+            f.close()
+
         return top_words
 
     def extract_nouns(self, sentence):
@@ -151,8 +180,7 @@ if __name__ == '__main__':
     data_SF = '../data/reviews_SF.pkl'
     data_1 = '../data/reviews_1.pkl'
     data_2 = '../data/reviews_2.pkl'
-    # length_distribution_filename = '../data/length_distribution.png'
-
+    
     df_SF = pd.read_pickle(data_SF)
     df1 = pd.read_pickle(data_1)
     df2 = pd.read_pickle(data_2)
@@ -166,8 +194,8 @@ if __name__ == '__main__':
     # eda.review_size_distribution(df, length_distribution_filename)
     # eda.ratings_distribution(df, ratings_filename)
     
-    # Getting rid of short reviews (< 100 characters)
-    # df = df[df['review_lengths'] > 100]   
+    Getting rid of short reviews (< 100 characters)
+    df = df[df['review_lengths'] > 100]   
     
     n_topics = 100
     ngram_range = (2, 2)
@@ -183,9 +211,9 @@ if __name__ == '__main__':
     #                      max_words=max_words,
     #                      max_iter=max_iter)
 
-    top_filename = '../data/topics_%d_%dgram_max_%d_lg_s.txt' % (n_topics,
-                                                                 ngram_range[1],
-                                                                 max_words)
+    top_filename = '../data/topics_%d_%dgram_max_%d_100_s.txt' % (n_topics,
+                                                                  ngram_range[1],
+                                                                  max_words)
 
     te = TopicExtraction(n_topics=n_topics,
                          sentence=True,
@@ -193,28 +221,7 @@ if __name__ == '__main__':
                          max_words=max_words,
                          max_iter=max_iter)
 
-    top_words = te.top_words(df['reviews'], top_n=15)
-
-    # with open(top_filename, 'w') as f:
-    #     f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
-    #     f.write('\n')
-    #     f.write('n_topics: %d' % n_topics)
-    #     f.write('\n')
-    #     f.write('-------------------------')
-    #     f.write('\n')
-    #     for topic in top_words:
-    #         f.write('Topic %d' % topic)
-    #         f.write('\n')
-    #         for word in top_words[topic]:
-    #             f.write(word)
-    #             f.write('\n')
-    #         f.write('-------------------------')
-    #         f.write('\n')
-    # f.close()
-    # TODO: add path to font file
-    path = '/Library/Fonts/Georgia.ttf'
-    wordcloud = WordCloud(font_path=path).generate(' '.join(top_words[0]))
-    plt.figure(figsize=(10, 8))
-    plt.imshow(wordcloud)
-    plt.axis('off')
-    plt.savefig('../data/wordcloud_0.png')
+    top_words = te.top_words(df['reviews'],
+                             top_n=15,
+                             top_filename=top_filename,
+                             wordcloud=True)
