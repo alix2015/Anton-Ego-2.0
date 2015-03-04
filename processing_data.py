@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from sklearn.cluster import KMeans
 from sklearn.metrics import precision_score, recall_score, accuracy_score
+from wordcloud import WordCloud
 # from sklearn.pipeline import Pipeline
 # import cPickle as pickle
 
@@ -194,20 +195,26 @@ if __name__ == '__main__':
 
     top_words = te.top_words(df['reviews'], top_n=15)
 
-    with open(top_filename, 'w') as f:
-        f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
-        f.write('\n')
-        f.write('n_topics: %d' % n_topics)
-        f.write('\n')
-        f.write('-------------------------')
-        f.write('\n')
-        for topic in top_words:
-            f.write('Topic %d' % topic)
-            f.write('\n')
-            for word in top_words[topic]:
-                f.write(word)
-                f.write('\n')
-            f.write('-------------------------')
-            f.write('\n')
-    f.close()
-
+    # with open(top_filename, 'w') as f:
+    #     f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
+    #     f.write('\n')
+    #     f.write('n_topics: %d' % n_topics)
+    #     f.write('\n')
+    #     f.write('-------------------------')
+    #     f.write('\n')
+    #     for topic in top_words:
+    #         f.write('Topic %d' % topic)
+    #         f.write('\n')
+    #         for word in top_words[topic]:
+    #             f.write(word)
+    #             f.write('\n')
+    #         f.write('-------------------------')
+    #         f.write('\n')
+    # f.close()
+    # TODO: add path to font file
+    path = '/Library/Fonts/Georgia.ttf'
+    wordcloud = WordCloud(font_path=path).generate(' '.join(top_words[0]))
+    plt.figure(figsize=(10, 8))
+    plt.imshow(wordcloud)
+    plt.axis('off')
+    plt.savefig('../data/wordcloud_0.png')
