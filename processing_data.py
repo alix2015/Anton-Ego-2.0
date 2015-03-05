@@ -38,7 +38,7 @@ class TopicExtraction(object):
                               max_iter=self.max_iter)
         self.trained = False
         self.H_ = None
-        self.category = {}
+        self.category = None
         self.fonts_ = '/Library/Fonts/Georgia.ttf'
         self.wordcloud = WordCloud(font_path=self.fonts_)
         
@@ -127,6 +127,7 @@ class TopicExtraction(object):
         So far, hand-labelling of the latent topics
         TODO: use an ontology
         '''
+        self.category = {}
         self.category['food'] = {4, 6, 7, 21, 24, 32, 34, 35, 2, 36, 25, 37,
                                 38, 39, 40, 41, 42, 44, 47, 48, 53, 54, 55,
                                 56, 65, 68, 69, 70, 73, 75, 79, 85, 91, 93,
@@ -171,6 +172,8 @@ class TopicExtraction(object):
         self.category['price'] = {67}
         self.category['cook'] = {68, 75}
 
+        print 'Categories created'
+
     def extract_onecat_top(self, texts, category, filename, top_n=15):
         '''
         INPUT: list of strings, string, integer
@@ -182,7 +185,8 @@ class TopicExtraction(object):
         It exports these words as word clouds and returns them.
         '''
 
-        self._define_categories()
+        if not self.category:
+            self._define_categories()
         if self.sentence:
             texts = [sent for item in
                     [sent_tokenize(text) for text in texts] for
@@ -190,11 +194,16 @@ class TopicExtraction(object):
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-        for topic in xrange(self.n_topics):
+        top_words = []
+        for topic in self.category[category]:
             top_doc_idx = np.argsort(W[:, topic])[-1:-(top_n + 1):-1]
-            top_words = [self.my_tokenize(texts[idx]) for idx in top_doc_idx]
-            top_words = [item for sublist in top_words for item in sublist]
-            self.cloud_fig(' '.join(top_words), '../data/%s.png' % filename)
+            temp = [self.my_tokenize(texts[idx]) for idx in top_doc_idx]
+            temp = [item for sublist in temp for item in sublist]
+            print 'Type test ', type(temp[0])
+            for item in temp:
+                top_words.append(item)
+        
+        self.cloud_fig(top_words, '../data/%s.png' % filename)
 
 
 
@@ -282,10 +291,10 @@ if __name__ == '__main__':
     df_SF = pd.read_pickle(data_SF)
     texts = df[df['rest_name'] == '/absinthe-brasserie-and-bar']['reviews']
     tic = timeit.default_timer()
-    te.extract_onecat_top(texts, 'wine', '../data/test_wine.png')
+    te.extract_onecat_top(texts, 'wine', 'test_wine')
     toc = timeit.default_timer()
-    print 'One category highlights in %3.f' % (toc - tic)
-    te.extract_onecat_top(texts, 'experience', '../data/test_experience.png')
+    print 'One category highlights in %3.f seconds' % (toc - tic)
+    te.extract_onecat_top(texts, 'experience', 'test_experience')
 
     te = build_model(df, n_topics, ngram_range, max_words, max_iter, 
                      top_filename, model_filename)
