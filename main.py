@@ -12,6 +12,8 @@ from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 from processing_data import TopicExtraction
 from sentiment_analysis import SentimentWords
+import dill
+import timeit
 
 
 
@@ -54,15 +56,11 @@ def build_model(df,
 
 
 def main1():
-    tic = timeit.default_timer()
     data_SF = '../data/reviews_SF.pkl'
     data_1 = '../data/reviews_1.pkl'
     data_2 = '../data/reviews_2.pkl'
 
     df =  build_data([data_SF, data_1, data_2], min_rev_len=100)
-
-    toc = timeit.default_timer()
-    print 'Data built in %.3f seconds' % (toc - tic)
 
     n_topics = 100
     ngram_range = (2, 2)
@@ -103,8 +101,8 @@ def main1():
     print 'One category highlights in %3.f seconds' % (toc - tic)
     te.extract_onecat_top(texts, 'experience', 'test_experience')
 
-    te = build_model(df, n_topics, ngram_range, max_words, max_iter, 
-                     top_filename, model_filename)
+    # te = build_model(df, n_topics, ngram_range, max_words, max_iter, 
+    #                  top_filename, model_filename)
 
 
 def main2():
@@ -115,6 +113,48 @@ def main2():
         dill.dump(sentWord, f)
         print 'Finished pickling the model'
 
+def main3():
+    data_SF = '../data/reviews_SF.pkl'
+    data_1 = '../data/reviews_1.pkl'
+    data_2 = '../data/reviews_2.pkl'
+
+    df =  build_data([data_SF, data_1, data_2], min_rev_len=100)
+
+    n_topics = 100
+    ngram_range = (2, 2)
+    max_words = 5000
+    max_iter = 400
+
+    model_filename = '../data/topics_3.pkl'
+
+
+    te = TopicExtraction(n_topics=n_topics,
+                         sentence=True,
+                         ngram_range=ngram_range,
+                         max_words=max_words,
+                         max_iter=max_iter)
+
+    tic = timeit.default_timer()
+    te.fit_transform(df['reviews'])
+    toc = timeit.default_timer()
+
+    print 'Fitting in %3.f seconds' % (toc - tic)
+
+    texts = df[df['rest_name'] == '/absinthe-brasserie-and-bar']['reviews']
+    categories = ['food', 'wine', 'special occasion', 'price']
+
+    sentWords = dill.load(open('../data/sentWord.pkl', 'rb'))
+
+    for cat in categories:
+        print 'Category: %s' % cat
+        tic = timeit.default_timer()
+        p_pos, p_neg = te.sentiment_one_cat(sentWords, texts, cat)
+        toc = timeit.default_timer()
+        print 'Sentiment: %d' % (p_pos > p_neg)
+        print 'p_pos: %3.f' % p_pos
+        print 'p_neg: %3.f' % p_neg
+        print 'Sentiment analysis in %3.f seconds' % (toc - tic)
+   
 
 if __name__ == '__main__':
-    main1()
+    main3()

@@ -54,3 +54,33 @@ class SentimentWords(object):
     def get_score(self, word):
         return self.dic.get(word, (0., 0.))
 
+
+class BlobSentimentAnalysis(object):
+    def __init__(self, sent):
+        self.blob = TextBlob(sent, analyzer=NaiveBayesAnalyzer())
+
+    def sentiment(self):
+        sent = self.blob.sentiment
+        return sent.p_pos, sent.p_neg 
+
+class AvgSentimentAnalysis(object):
+    def __init__(self, sentWords, sent):
+        self.words = sent.split()
+        self.sentWords = sentWords
+
+    def sentiment(self):
+        probas = np.array([[self.sentWords.get_score(w)[0],
+                          self.sentWords.get_score(w)[1]] for w in self.words])
+        return probas.mean(axis=0)
+
+
+
+class SentimentAnalysis(object):
+    """docstring for SentimentAnalysis"""
+    def __init__(self, rest_names, sentWord):
+        self.rest_names = rest_names
+        self.priors = sentWord.get_score
+
+
+    # def setting_priors():
+

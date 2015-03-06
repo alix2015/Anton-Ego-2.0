@@ -8,11 +8,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from sklearn.cluster import KMeans
 from wordcloud import WordCloud
+from sentiment_analysis import BlobSentimentAnalysis, AvgSentimentAnalysis
 # from sklearn.metrics import precision_score, recall_score, accuracy_score
 # from sklearn.pipeline import Pipeline
 # import cPickle as pickle
 import dill
-import timeit
+
 
 
 
@@ -170,7 +171,7 @@ class TopicExtraction(object):
         self.category['price'] = {67}
         self.category['cook'] = {68, 75}
 
-        print 'Categories created'
+        # print 'Categories created'
 
     def extract_onecat_top(self, texts, category, filename, top_n=15):
         '''
@@ -197,10 +198,41 @@ class TopicExtraction(object):
             top_doc_idx = np.argsort(W[:, topic])[-1:-(top_n + 1):-1]
             temp = [self.my_tokenize(texts[idx]) for idx in top_doc_idx]
             temp = [item for sublist in temp for item in sublist]
-            print 'Type test ', type(temp[0])
+            
             for item in temp:
                 top_words.append(item)
         
         self.cloud_fig(top_words, '../data/%s.png' % filename)
 
-    
+    def sentiment_one_cat(self, sentWords, texts, category):
+        if not self.category:
+            self._define_categories()
+
+        texts = [sent for item in [sent_tokenize(text) for text in texts] for
+                sent in item]
+        V = self.vectorizer.transform(texts)
+        W = self.factorizor.transform(V)
+
+        p_pos = 0.
+        p_neg = 0.
+        cnt = 0
+        texts = np.array(texts)
+        for topic in self.category[category]:
+            docs = texts[W[:, topic] > 0]
+
+            for sent in docs:
+                cnt += 1
+                # Blob implementation too slow (infinitely slow)
+                # bsa = BlobSentimentAnalysis(sent)
+                # sentiment = bsa.sentiment()
+                avg_sa = AvgSentimentAnalysis(sentWords, sent)
+                sentiment = avg_sa.sentiment()
+                p_pos += sentiment[0]
+                p_neg += sentiment[1]
+
+        p_pos = p_pos / float(cnt)
+        p_neg = p_neg / float(cnt)
+
+        return p_pos, p_neg
+
+

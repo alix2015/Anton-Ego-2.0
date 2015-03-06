@@ -96,7 +96,7 @@ class ExtractData(object):
 if __name__ == '__main__':
     filename = '../data/reviews_SF.pkl'
     
-    ed = ed = ExtractData()
+    ed = ExtractData()
 
     df = ed.to_dataframe(filename)
 
