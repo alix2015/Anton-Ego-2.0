@@ -68,6 +68,9 @@ class AvgSentimentAnalysis(object):
         self.words = sent.split()
         self.sentWords = sentWords
 
+    def pos_tag(self, sent):
+        return [pos_tag]
+
     def sentiment(self):
         probas = np.array([[self.sentWords.get_score(w)[0],
                           self.sentWords.get_score(w)[1]] for w in self.words])
