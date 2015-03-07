@@ -213,12 +213,17 @@ class TopicExtraction(object):
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-        p_pos = 0.
-        p_neg = 0.
+        avg_pos = 0.
+        avg_neg = 0.
+        max_pos = 0.
+        min_pos = 0.
+        max_neg = 0.
+        min_neg = 0.
         cnt = 0
-        texts = np.array(texts)
+        
         for topic in self.category[category]:
-            docs = texts[W[:, topic] > 0]
+            idx = np.argsort(W[:, topic])[-1:-16:-1]
+            docs = [texts[i] for i in idx]
 
             for sent in docs:
                 cnt += 1
@@ -227,12 +232,21 @@ class TopicExtraction(object):
                 # sentiment = bsa.sentiment()
                 avg_sa = AvgSentimentAnalysis(sentWords, sent)
                 sentiment = avg_sa.sentiment()
-                p_pos += sentiment[0]
-                p_neg += sentiment[1]
+                avg_pos += sentiment[0][0]
+                avg_neg += sentiment[0][1]
+                max_pos += sentiment[1][0]
+                max_neg += sentiment[1][0]
+                min_pos += sentiment[2][0]
+                min_neg += sentiment[2][1]
 
-        p_pos = p_pos / float(cnt)
-        p_neg = p_neg / float(cnt)
+        cnt = float(cnt)
+        avg_pos = avg_pos / cnt
+        avg_neg = avg_neg / cnt
+        max_pos = max_pos / cnt
+        max_neg = max_neg / cnt
+        min_pos = min_pos / cnt
+        min_neg = min_neg / cnt
 
-        return p_pos, p_neg
+        return (avg_pos, avg_neg), (max_pos, max_neg), (min_pos, min_neg)
 
 

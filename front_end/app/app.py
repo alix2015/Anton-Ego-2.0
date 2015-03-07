@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 
 
-PORT = 6969
+PORT = 8888
 
 app = Flask(__name__)
 
@@ -17,19 +17,25 @@ def home():
 #============================================
 @app.route('/submit_page')
 def submission_page():
-    return '''
-    <form action="/topic" method='POST' >
-        <input type="text" name="user_input" />
-        <input type="submit" />
-    </form>
-    '''
+    return render_template('submit.html')
+    # return '''
+    # <form action="/topic" method='POST' >
+    #     <input type="text" name="user_input" />
+    #     <input type="submit" />
+    # </form>
+    # '''
 
 # RESULT PAGE
 #============================================
 @app.route('/topic', methods=['POST'])
 def predict_page():
     # get data from request form, the key is the name you set in your form
-    data = request.form['user_input']
+    # TODO: 'Sorry, the Critic has not yet visited this restaurant'
+    rest_name = request.form['user_input']
+    rest_link = 'http://www.opentable.com/lardoise'
+    return render_template('result2.html',
+                           rest_name=rest_name,
+                           rest_link=rest_link)
 
 
 

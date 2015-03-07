@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
+from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 from sklearn.cluster import KMeans
@@ -34,8 +35,8 @@ def build_model(df,
                 ngram_range,
                 max_words,
                 max_iter,
-                top_filename,
-                model_filename):
+                model_filename,
+                top_filename=None):
     
     te = TopicExtraction(n_topics=n_topics,
                          sentence=True,
@@ -43,10 +44,14 @@ def build_model(df,
                          max_words=max_words,
                          max_iter=max_iter)
 
-    top_words = te.extract_top_words(df['reviews'],
-                                     top_n=15)
-                                     # top_filename=top_filename,
-                                     # wordcloud=True)
+
+    if top_filename:
+        top_words = te.extract_top_words(df['reviews'],
+                                         top_n=15,
+                                         top_filename=top_filename)
+                                         # wordcloud=True)
+    else:
+        te.fit_transform(df['reviews'])
 
     if model_filename:
         with open(model_filename, 'w') as f:
@@ -114,9 +119,9 @@ def main2():
         print 'Finished pickling the model'
 
 def main3():
-    data_SF = '../data/reviews_SF.pkl'
-    data_1 = '../data/reviews_1.pkl'
-    data_2 = '../data/reviews_2.pkl'
+    data_SF = '../../data/reviews_SF.pkl'
+    data_1 = '../../data/reviews_1.pkl'
+    data_2 = '../../data/reviews_2.pkl'
 
     df =  build_data([data_SF, data_1, data_2], min_rev_len=100)
 
@@ -125,36 +130,36 @@ def main3():
     max_words = 5000
     max_iter = 400
 
-    model_filename = '../data/topics_3.pkl'
-
-
-    te = TopicExtraction(n_topics=n_topics,
-                         sentence=True,
-                         ngram_range=ngram_range,
-                         max_words=max_words,
-                         max_iter=max_iter)
+    model_filename = '../../data/topics_5.pkl'
 
     tic = timeit.default_timer()
-    te.fit_transform(df['reviews'])
+
+    te = build_model(df,
+                     n_topics,
+                     ngram_range,
+                     max_words,
+                     max_iter,
+                     model_filename)
+
     toc = timeit.default_timer()
 
-    print 'Fitting in %3.f seconds' % (toc - tic)
+    print 'Building model in %3.f seconds' % (toc - tic)
 
     texts = df[df['rest_name'] == '/absinthe-brasserie-and-bar']['reviews']
     categories = ['food', 'wine', 'special occasion', 'price']
 
-    sentWords = dill.load(open('../data/sentWord.pkl', 'rb'))
+    sentWords = dill.load(open('../../data/sentWord.pkl', 'rb'))
 
     for cat in categories:
         print 'Category: %s' % cat
         tic = timeit.default_timer()
-        p_pos, p_neg = te.sentiment_one_cat(sentWords, texts, cat)
+        av, ma, mi = te.sentiment_one_cat(sentWords, texts, cat)
         toc = timeit.default_timer()
-        print 'Sentiment: %d' % (p_pos > p_neg)
-        print 'p_pos: %3.f' % p_pos
-        print 'p_neg: %3.f' % p_neg
+        # print 'Sentiment: %d' % (p_pos > p_neg)
+        print 'p_pos: %3.f, %3.f, %3.f' % (av[0], ma[0], mi[0])
+        print 'p_neg: %3.f, %3.f, %3.f' % (av[1], ma[1], mi[1])
         print 'Sentiment analysis in %3.f seconds' % (toc - tic)
-   
 
+   
 if __name__ == '__main__':
-    main3()
+    main4()

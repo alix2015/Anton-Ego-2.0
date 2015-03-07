@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
+from nltk.corpus import stopwords
 from wordcloud import WordCloud
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
@@ -68,13 +69,14 @@ class AvgSentimentAnalysis(object):
         self.words = sent.split()
         self.sentWords = sentWords
 
-    def pos_tag(self, sent):
-        return [pos_tag]
+    # def pos_tag(self, sent):
+    #     return pos_tag(sent.split())
 
     def sentiment(self):
         probas = np.array([[self.sentWords.get_score(w)[0],
-                          self.sentWords.get_score(w)[1]] for w in self.words])
-        return probas.mean(axis=0)
+                          self.sentWords.get_score(w)[1]] \
+                          for w in self.words if w not in stopwords.words()])
+        return probas.mean(axis=0), probas.max(axis=0), probas.min(axis=0)
 
 
 

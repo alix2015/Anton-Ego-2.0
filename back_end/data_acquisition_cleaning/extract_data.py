@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import re
 import itertools
+import timeit
 
 
 class ExtractData(object):
@@ -11,20 +12,20 @@ class ExtractData(object):
         self.client = MongoClient()
         self.db = self.client.opentable
         # TODO: not harcoding the name of the collection
-        self.collection = self.db.reviews
+        self.collection = self.db.review2
+        self.collectionOut = self.db.clean2
 
     def to_dataframe(self, filename):
         '''
-        INPUT: MongoDB collection
+        INPUT: ExtractData object, string
         OUTPUT: pandas dataframe
-        Extracting the reviews from the raw html stored in MongoDB collection.
-        Necessary to get all the lines corresponding to a rest_name (one per page)
+        Extracting the reviews from the raw html stored in MongoDB self.collection.
+        Necessary to get all the lines corresponding to a rest_name (one per page).
+        Pickle the dataframe to filename
         '''
         
         # List of restaurants
-        restos = list(self.collection.find({}, {'rest_name':1, '_id':0}))
-        restos = [d['rest_name'] for d in restos[:10]]
-        restos = set(restos)
+        restos = self.collection.distinct('rest_name')
 
         df_list = []
         for r in restos:
@@ -55,6 +56,39 @@ class ExtractData(object):
         df3.to_pickle(filename)
 
         return df3
+
+    def to_mongo(self):
+        '''
+        INPUT: ExtractData object
+        OUTPUT: None
+        Process the raw reviews in self.collection and store them in
+        self.collectionOut.
+        '''
+
+        # # List of restaurants
+        # restos = self.collection.distinct('rest_name')
+        # Cursor to process all the documents
+        cursor = self.collection.find({})
+
+        for doc in cursor:
+            url = doc['url']
+            rest_name = doc['rest_name']
+            rid = doc['rid']
+            html = doc['html']
+            data = self.data(html)
+
+            for tup in data:
+                self.collectionOut.insert({'url': url,
+                                          'rest_name': rest_name,
+                                          'rid': rid,
+                                          'review_title': tup[0],
+                                          'review_length': tup[1],
+                                          'review': tup[2],
+                                          'rating': tup[3],
+                                          'food_rating': tup[4],
+                                          'service_rating': tup[5],
+                                          'ambience_rating': tup[6]})
+
 
 
     def data(self, raw):
@@ -93,7 +127,7 @@ class ExtractData(object):
                                           ambience_rating)]
 
 
-if __name__ == '__main__':
+def main1():
     filename = '../data/reviews_SF.pkl'
     
     ed = ExtractData()
@@ -103,3 +137,15 @@ if __name__ == '__main__':
     print df.shape
     print 'Info:'
     print df.info()
+
+
+def main2():
+    extractor = ExtractData()
+    tic = timeit.default_timer()
+    extractor.to_mongo()
+    toc = timeit.default_timer()
+    print 'Extraction finished in %.3f seconds.' % (toc - tic)
+
+
+if __name__ == '__main__':
+    main2()
