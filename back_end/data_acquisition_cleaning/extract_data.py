@@ -8,6 +8,11 @@ import timeit
 
 
 class ExtractData(object):
+    '''
+    For the small dataset I was usind during the first week,
+    I used a dataframe. I have now processed the larger datasets
+    (training and test) using to_mongo.
+    '''
     def __init__(self):
         self.client = MongoClient()
         self.db = self.client.opentable
@@ -15,12 +20,47 @@ class ExtractData(object):
         self.collection = self.db.review2
         self.collectionOut = self.db.clean2
 
+
+    def to_mongo(self):
+        '''
+        INPUT: ExtractData object
+        OUTPUT: None
+
+        Process the raw reviews in MongoDB self.collection and store them in
+        MongoDB self.collectionOut.
+        '''
+
+        cursor = self.collection.find({})
+
+        for doc in cursor:
+            url = doc['url']
+            rest_name = doc['rest_name']
+            rid = doc['rid']
+            html = doc['html']
+            data = self.data(html)
+
+            for tup in data:
+                self.collectionOut.insert({'url': url,
+                                          'rest_name': rest_name,
+                                          'rid': rid,
+                                          'review_title': tup[0],
+                                          'review_length': tup[1],
+                                          'review': tup[2],
+                                          'rating': tup[3],
+                                          'food_rating': tup[4],
+                                          'service_rating': tup[5],
+                                          'ambience_rating': tup[6]})
+
+
     def to_dataframe(self, filename):
         '''
         INPUT: ExtractData object, string
         OUTPUT: pandas dataframe
-        Extracting the reviews from the raw html stored in MongoDB self.collection.
-        Necessary to get all the lines corresponding to a rest_name (one per page).
+        
+        Extracting the reviews from the raw html stored in MongoDB
+        self.collection.
+        Necessary to get all the lines corresponding to a rest_name 
+        (one per page).
         Pickle the dataframe to filename
         '''
         
@@ -56,38 +96,6 @@ class ExtractData(object):
         df3.to_pickle(filename)
 
         return df3
-
-    def to_mongo(self):
-        '''
-        INPUT: ExtractData object
-        OUTPUT: None
-        Process the raw reviews in self.collection and store them in
-        self.collectionOut.
-        '''
-
-        # # List of restaurants
-        # restos = self.collection.distinct('rest_name')
-        # Cursor to process all the documents
-        cursor = self.collection.find({})
-
-        for doc in cursor:
-            url = doc['url']
-            rest_name = doc['rest_name']
-            rid = doc['rid']
-            html = doc['html']
-            data = self.data(html)
-
-            for tup in data:
-                self.collectionOut.insert({'url': url,
-                                          'rest_name': rest_name,
-                                          'rid': rid,
-                                          'review_title': tup[0],
-                                          'review_length': tup[1],
-                                          'review': tup[2],
-                                          'rating': tup[3],
-                                          'food_rating': tup[4],
-                                          'service_rating': tup[5],
-                                          'ambience_rating': tup[6]})
 
 
 

@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
+from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
-from sklearn.cluster import KMeans
+# from sklearn.cluster import KMeans
 from wordcloud import WordCloud
 from sentiment_analysis import BlobSentimentAnalysis, AvgSentimentAnalysis
 # from sklearn.metrics import precision_score, recall_score, accuracy_score
@@ -19,15 +20,26 @@ import dill
 
 class TopicExtraction(object):
     def __init__(self,
+                 rest_names=[],
                  n_topics=6,
                  sentence=False,
                  ngram_range=(1, 1),
                  max_words=None,
                  max_iter=200):
+        '''
+        INPUT: TopicExtraction object, <list of strings, integer, boolean,
+        tuple of integers, integer, integer>
+        OUTPUT: None
+
+        rest_names are added to the stopwords
+        sentence is a boolean indicating whether sentences are the documents
+        '''
+        self.rest_names = rest_names
         self.n_topics = n_topics
         self.sentence = sentence
         self.max_words = max_words
         self.ngram_range = ngram_range
+        self.stopwords = stopwords.words()
         self.max_iter = max_iter
         self.vectorizer = TfidfVectorizer(stop_words='english',
                                           max_features=self.max_words,
@@ -44,18 +56,32 @@ class TopicExtraction(object):
 
     def my_tokenize(self, text):
         '''
-        Input: string
-        Output: list of strings
+        INPUT: TopicExtraction object, string
+        OUTPUT: list of strings
+
+        tokenizing
         '''
         text = text.lower().encode('ascii', errors='ignore')
+        rest_names = ' '.join(self.rest_names).lower()\
+                    .encode('ascii', errors='ignore')
         # list_tokenized = RegexpTokenizer(r'\w+').tokenize(text)
         list_tokenized = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
                                          gaps=True).tokenize(text)
-        list_tokenized = [word for word in list_tokenized if len(word) > 1]
+        rest_names = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
+                                     gaps=True).tokenize(rest_names)
+        for name in rest_names:
+            self.stopwords.append(name)
+        list_tokenized = [word for word in list_tokenized\
+                            if word not in self.stopwords]
         
         return list_tokenized
 
     def fit_transform(self, texts):
+        '''
+        INPUT: TopicExtraction object, list of strings
+        OUTPUT: array
+        vectorizing and factorizing into n_topics latent topics
+        '''
         if self.sentence:
             texts = [sent for item in
                     [sent_tokenize(text) for text in texts] for
@@ -113,79 +139,59 @@ class TopicExtraction(object):
         return top_words
 
     def cloud_fig(self, top_words, filename):
+        '''
+        INPUT: TopicExtraction object, list of strings, string
+        OUTPUT: None
+
+        Given a list of words, builds a word cloud and save the figure
+        in filename.
+        '''
         wordcloud = self.wordcloud.generate(' '.join(top_words))
         plt.figure(figsize=(10, 8))
         plt.imshow(wordcloud)
         plt.axis('off')
         plt.savefig(filename)
-        # IMPORTANT: CLOSING FIGURE TO FREE MEMORY
         plt.close()
         
-    def _define_categories(self):
+    def _define_categories(self, dic):
         '''
-        So far, hand-labelling of the latent topics
-        TODO: use an ontology
-        '''
-        self.category = {}
-        self.category['food'] = {4, 6, 7, 21, 24, 32, 34, 35, 2, 36, 25, 37,
-                                38, 39, 40, 41, 42, 44, 47, 48, 53, 54, 55,
-                                56, 65, 68, 69, 70, 73, 75, 79, 85, 91, 93,
-                                95, 97}
-        self.category['service'] = {5, 9, 15, 18, 19, 45, 58, 60, 62, 66, 71,
-                                    72, 81, 90, 94, 98}
-        self.category['ambience'] = {10, 16, 20, 26, 31, 61, 64}
-        
-        self.category['wine'] = {2, 36}
-        self.category['cocktail'] = {25, 36}
-        self.category['steak'] = {21}
-        self.category['Chinese'] = {24}
-        self.category['French'] = {47, 87}
-        self.category['cheese'] = {34, 97}
-        self.category['dessert'] = {35, 40, 95}
-        self.category['vegetables'] = {37}
-        self.category['meat'] = {42, 44, 47, 49, 51, 53, 69, 70, 85, 91}
-        self.category['pork'] = {51}
-        self.category['steak'] = {49, 53, 69, 70, 85}
-        self.category['egg'] = {44}
-        self.category['potato'] = {44, 48}
-        self.category['entree'] = {38, 39}
-        self.category['layout'] = {16, 26}
-        self.category['noise'] = {17, 64, 82}
-        self.category['music'] = {64, 82}
-        self.category['location'] = {26, 50, 52, 76, 77}
-        self.category['vegetarian'] = {56, 87}
-        self.category['salad'] = {87}
-        self.category['brunch'] = {65, 90}
-        self.category['Mediterranean'] = {73}
-        self.category['Indian'] = {79}
-        
-        self.category['excellent'] = {3, 5, 18, 20, 25, 27, 29, 33, 34, 96, 99}
-        self.category['positive sentiment'] = {9, 10, 11, 12, 15, 19, 
-                                               22, 28, 45, 46, 54, 59, 60, 62,
-                                               63, 66, 68, 80, 81, 86, 90, 94}
-        self.category['negative sentiment'] = {46, 58, 71, 94}
-        self.category['experience'] = {8, 78, 92}
-        self.category['positive recommendation'] = {13, 23, 30, 74, 83}
-        self.category['special occasion'] = {14, 31, 43, 59, 74, 84, 89}
-        self.category['reservation'] = {60}
-        self.category['price'] = {67}
-        self.category['cook'] = {68, 75}
+        INPUT: TopicExtraction object, dictionary
+        OUTPUT: None
 
+        Updates the category attribute of the TopicExtraction object,
+        with a dictionary the keys of which are the latent topic name
+        and the value is a set of the indices of the corresponding latent
+        topic components in the factorization.
+        So far, hand-labelling of the latent topics
+        Possible improvement: using an ontology
+        '''
+        self.category = dic
         # print 'Categories created'
 
-    def extract_onecat_top(self, texts, category, filename, top_n=15):
+    def extract_onecat_topwords(self,
+                                texts,
+                                category,
+                                filename,
+                                top_n=15,
+                                dic=None):
         '''
-        INPUT: list of strings, string, integer
+        INPUT: TopicExtraction object, list of strings, string, 
+               string, integer, <dictionary>
         OUTPUT: list of strings
 
         This method transforms a test set using the trained model
         to extract the top words in the latent topics corresponding
-        to one category.
-        It exports these words as word clouds and returns them.
+        to one category. In case the category attribute of the TopicExtraction
+        object has not yet been initialized, a dictionary should be provided.
+        It exports these words as a word cloud in filename and returns them.
         '''
 
         if not self.category:
-            self._define_categories()
+            if dic:
+                self._define_categories(dic)
+            else:
+                print 'Please provide a dictionary to initialize the categories'
+                return
         if self.sentence:
             texts = [sent for item in
                     [sent_tokenize(text) for text in texts] for
@@ -202,51 +208,34 @@ class TopicExtraction(object):
             for item in temp:
                 top_words.append(item)
         
-        self.cloud_fig(top_words, '../data/%s.png' % filename)
+        self.cloud_fig(top_words, '../../data/%s.png' % filename)
+        return top_words
 
-    def sentiment_one_cat(self, sentWords, texts, category):
+
+    def extract_onecat_sentences(self, texts, category, dic=None):
+        '''
+        INPUT: TopicExtraction object, list of strings, string, <dictionary>
+        OUTPUT: list of list of strings
+
+        This method extracts from a test set of documents the sentences
+        relevant to the given category. If the category attribute of
+        the TopicExtraction object has not been initialized a dictionary
+        should be provided.
+        '''
         if not self.category:
-            self._define_categories()
-
-        texts = [sent for item in [sent_tokenize(text) for text in texts] for
-                sent in item]
+            if dic:
+                self._define_categories(dic)
+            else:
+                print 'Please provide a dictionary to initialize the categories'
+                return
+        texts = [sent for item in [sent_tokenize(text) for text in texts]\
+                 for sent in item]
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-        avg_pos = 0.
-        avg_neg = 0.
-        max_pos = 0.
-        min_pos = 0.
-        max_neg = 0.
-        min_neg = 0.
-        cnt = 0
-        
         for topic in self.category[category]:
             idx = np.argsort(W[:, topic])[-1:-16:-1]
-            docs = [texts[i] for i in idx]
+            docs = [self.my_tokenize(texts[i]) for i in idx]
 
-            for sent in docs:
-                cnt += 1
-                # Blob implementation too slow (infinitely slow)
-                # bsa = BlobSentimentAnalysis(sent)
-                # sentiment = bsa.sentiment()
-                avg_sa = AvgSentimentAnalysis(sentWords, sent)
-                sentiment = avg_sa.sentiment()
-                avg_pos += sentiment[0][0]
-                avg_neg += sentiment[0][1]
-                max_pos += sentiment[1][0]
-                max_neg += sentiment[1][0]
-                min_pos += sentiment[2][0]
-                min_neg += sentiment[2][1]
-
-        cnt = float(cnt)
-        avg_pos = avg_pos / cnt
-        avg_neg = avg_neg / cnt
-        max_pos = max_pos / cnt
-        max_neg = max_neg / cnt
-        min_pos = min_pos / cnt
-        min_neg = min_neg / cnt
-
-        return (avg_pos, avg_neg), (max_pos, max_neg), (min_pos, min_neg)
-
+        return docs
 

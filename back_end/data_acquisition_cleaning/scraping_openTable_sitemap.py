@@ -7,6 +7,11 @@ import itertools
 import time
 
 
+'''
+This file defines the functions necessary to scrape Open Table
+restaurant review pages. Not encapsulated in a class.
+'''
+
 # 22 such pages (index of all the restaurants split into 22 pages)
 def get_resto_links(n):
     req = 'http://www.opentable.com/opentable-sitemap.aspx?pt=100&page=%d' % n
