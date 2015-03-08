@@ -101,8 +101,8 @@ def categorize():
     
     dic['excellent'] = {3, 5, 18, 20, 25, 27, 29, 33, 34, 96, 99}
     dic['positive sentiment'] = {9, 10, 11, 12, 15, 19, 
-                                           22, 28, 45, 46, 54, 59, 60, 62,
-                                           63, 66, 68, 80, 81, 86, 90, 94}
+                                 22, 28, 45, 46, 54, 59, 60, 62,
+                                 63, 66, 68, 80, 81, 86, 90, 94}
     dic['negative sentiment'] = {46, 58, 71, 94}
     dic['experience'] = {8, 78, 92}
     dic['positive recommendation'] = {13, 23, 30, 74, 83}

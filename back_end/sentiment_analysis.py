@@ -118,6 +118,11 @@ class AvgSentimentAnalysis(object):
         probas = np.array(probas)
         p_pos = probas[probas[:, 0] > 0][:, 0]
         p_neg = probas[probas[:, 1] > 0][:, 1]
+
+        if p_pos.shape[0] == 0:
+            p_pos = np.zeros(1)
+        if p_neg.shape[0] == 0:
+            p_neg = np.zeros(1)
         
         return ([p_pos.mean(axis=0), p_neg.mean(axis=0)],
                 [p_pos.max(axis=0), p_neg.max(axis=0)], 
