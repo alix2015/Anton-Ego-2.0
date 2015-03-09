@@ -1,5 +1,6 @@
 import numpy as np 
 import pandas as pd 
+from pymongo import MongoClient
 import matplotlib.pyplot as plt 
 from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize, word_tokenize
@@ -22,6 +23,8 @@ It will be cleaned at the end and be used as an example file
 on how to use this package.
 '''
 
+# Utilities for a pipeline based on dataframes
+
 def build_data(filenames, min_rev_len=0):
     df_list = []
     for file in filenames:
@@ -41,6 +44,7 @@ def build_model(df,
                 max_iter,
                 model_filename,
                 top_filename=None):
+    
     rest_names = df['rest_name'].dropna().unique().tolist()
 
     te = TopicExtraction(rest_names=rest_names,
@@ -64,6 +68,45 @@ def build_model(df,
             dill.dump(te, f)
             print 'Finished pickling the model'
     return te
+
+
+# Utilities for a pipeline based on MongoDB
+
+def build_model_mongo(n_topics,
+                      ngram_range,
+                      max_words,
+                      max_iter,
+                      model_filename,
+                      top_filename=None):
+    
+    client = MongoClient()
+    coll = client.opentable.clean3
+
+    rest_names = coll.distinct('rest_name')
+
+    te = TopicExtraction(rest_names=rest_names,
+                         n_topics=n_topics,
+                         sentence=True,
+                         ngram_range=ngram_range,
+                         max_words=max_words,
+                         max_iter=max_iter)
+
+    reviews = list(coll.find({}, {'review': 1, '_id': 0}))
+
+    if top_filename:
+        top_words = te.extract_top_words(reviews,
+                                         top_n=15,
+                                         top_filename=top_filename)
+                                         # wordcloud=True)
+    else:
+        te.fit_transform(reviews)
+
+    if model_filename:
+        with open(model_filename, 'w') as f:
+            dill.dump(te, f)
+            print 'Finished pickling the model'
+    return te
+
 
 def categorize():
     dic = {}
@@ -269,7 +312,28 @@ def main4():
         print 'p_neg: %3.f, %3.f, %3.f' % (av[1], ma[1], mi[1])
 
 
-# def main5():
+def main5():
+    n_topics = 100
+    ngram_range = (2, 2)
+    max_words = 5000
+    max_iter = 400
+
+    top_filename = 'te_3_%d_%dgram_max_%d_100_s.txt' % \
+                    (n_topics, ngram_range[1], max_words)
+
+    model_filename = '../front_end/data/te_3.pkl'
+
+    tic = timeit.default_timer()
+
+    te = build_model_mongo(n_topics,
+                           ngram_range,
+                           max_words,
+                           max_iter,
+                           model_filename)
+
+    toc = timeit.default_timer()
+
+    print 'Building model in %3.f seconds' % (toc - tic)
 
 
 
