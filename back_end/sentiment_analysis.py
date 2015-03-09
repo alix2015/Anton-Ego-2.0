@@ -4,9 +4,8 @@ import re
 import matplotlib.pyplot as plt 
 # from collections import defaultdict
 from nltk import RegexpParser
-from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import PorterStemmer
-from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.tokenize import RegexpTokenizer, sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
 from nltk.corpus import stopwords
 from wordcloud import WordCloud
