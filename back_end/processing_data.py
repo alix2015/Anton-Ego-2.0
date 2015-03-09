@@ -9,7 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 # from sklearn.cluster import KMeans
 from wordcloud import WordCloud
-from sentiment_analysis import BlobSentimentAnalysis, AvgSentimentAnalysis
+from sentiment_analysis import AvgSentimentAnalysis
 # from sklearn.metrics import precision_score, recall_score, accuracy_score
 # from sklearn.pipeline import Pipeline
 # import cPickle as pickle
