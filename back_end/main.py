@@ -91,7 +91,11 @@ def build_model_mongo(n_topics,
                          max_words=max_words,
                          max_iter=max_iter)
 
-    reviews = list(coll.find({}, {'review': 1, '_id': 0}))
+    cursor = coll.find({}, {'review': 1, '_id': 0})
+    reviews = []
+
+    for dic in cursor:
+        reviews.append(dic['review'])
 
     if top_filename:
         top_words = te.extract_top_words(reviews,
@@ -329,7 +333,8 @@ def main5():
                            ngram_range,
                            max_words,
                            max_iter,
-                           model_filename)
+                           model_filename,
+                           top_filename)
 
     toc = timeit.default_timer()
 
