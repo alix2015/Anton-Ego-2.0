@@ -14,6 +14,7 @@ from sentiment_analysis import AvgSentimentAnalysis
 # from sklearn.pipeline import Pipeline
 # import cPickle as pickle
 import dill
+import timeit
 
 
 
@@ -25,7 +26,8 @@ class TopicExtraction(object):
                  sentence=False,
                  ngram_range=(1, 1),
                  max_words=None,
-                 max_iter=200):
+                 max_iter=200,
+                 verbose=False):
         '''
         INPUT: TopicExtraction object, <list of strings, integer, boolean,
         tuple of integers, integer, integer>
@@ -41,6 +43,7 @@ class TopicExtraction(object):
         self.ngram_range = ngram_range
         self.stopwords = stopwords.words()
         self.max_iter = max_iter
+        self.verbose = verbose
         self.vectorizer = TfidfVectorizer(stop_words='english',
                                           max_features=self.max_words,
                                           tokenizer=self.my_tokenize,
@@ -86,8 +89,19 @@ class TopicExtraction(object):
             texts = [sent for item in
                     [sent_tokenize(text) for text in texts] for
                     sent in item] 
+        if self.verbose:
+            tic = timeit.default_timer()
+            print 'Starting Tfidf vectorizer...'
         V = self.vectorizer.fit_transform(texts)
+        if self.verbose:
+            toc = timeit.default_timer()
+            print 'Finished vectorizing in %.3f' % (toc - tic)
+            tic = timeit.default_timer()
+            print 'Starting factorizing...'
         W = self.factorizor.fit_transform(V)
+        if self.verbose:
+            toc = timeit.default_timer()
+            print 'Finished vectorizing in %3.f' % (toc - tic)
         self.H_ = self.factorizor.components_
         self.trained = True
         

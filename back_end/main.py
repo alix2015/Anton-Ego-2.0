@@ -78,6 +78,7 @@ def build_model_mongo(n_topics,
                       max_words,
                       max_iter,
                       model_filename,
+                      verbose=False,
                       top_filename=None):
     
     client = MongoClient()
@@ -90,14 +91,19 @@ def build_model_mongo(n_topics,
                          sentence=True,
                          ngram_range=ngram_range,
                          max_words=max_words,
-                         max_iter=max_iter)
+                         max_iter=max_iter,
+                         verbose=verbose)
 
     # Restricting to review longer than 
     cursor = coll.find({'review_length': {'$gt': 150}}, {'review': 1, '_id': 0})
     reviews = []
 
+    cnt = 0
     for dic in cursor:
         reviews.append(dic['review'])
+        cnt += 1
+        if not (cnt % 50):
+            print '%d reviews read' % (cnt + 1)
 
     if top_filename:
         top_words = te.extract_top_words(reviews,
@@ -329,6 +335,8 @@ def main5():
 
     model_filename = '../front_end/data/te_3.pkl'
 
+    verbose = True
+
     tic = timeit.default_timer()
 
     te = build_model_mongo(n_topics,
@@ -336,6 +344,7 @@ def main5():
                            max_words,
                            max_iter,
                            model_filename,
+                           verbose,
                            top_filename)
 
     toc = timeit.default_timer()
