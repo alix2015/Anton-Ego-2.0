@@ -110,6 +110,7 @@ def build_model_mongo(n_topics,
         n_rev = int(fraction * len(reviews))
         idx = np.random.random_integers(0, len(reviews) - 1, n_rev)
         reviews = [reviews[i] for i in idx]
+        print 'Subset of %d reviews' % n_rev
 
     if top_filename:
         top_words = te.extract_top_words(reviews,
@@ -335,6 +336,7 @@ def main5():
     ngram_range = (2, 2)
     max_words = 5000
     max_iter = 400
+    fraction = .1
 
     top_filename = 'te_3_%d_%dgram_max_%d_100_s.txt' % \
                     (n_topics, ngram_range[1], max_words)
@@ -351,6 +353,7 @@ def main5():
                            max_iter,
                            model_filename,
                            verbose,
+                           fraction,
                            top_filename)
 
     toc = timeit.default_timer()
