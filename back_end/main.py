@@ -92,7 +92,8 @@ def build_model_mongo(n_topics,
                          max_words=max_words,
                          max_iter=max_iter)
 
-    cursor = coll.find({}, {'review': 1, '_id': 0})
+    # Restricting to review longer than 
+    cursor = coll.find({'review_length': {'$gt': 150}}, {'review': 1, '_id': 0})
     reviews = []
 
     for dic in cursor:
@@ -378,13 +379,14 @@ def main6():
     te._define_categories(dic)
     print te.category['wine']
 
-    print dic['wine']
+    # print dic['wine']
 
     # Test with a random restaurant: 'Mezcal' (127 reviews)
     # coll.find({'rest_name': 'Mezcal'}, {}).count()
     # Problem with this restaurant: no review saved?!?
     # Another: 'Pink', 6 reviews
-    restos = ["Pink", "Harris'"]
+    # restos = ["Pink", "Harris'"]
+    restos = ["Pink"]
     categories = ['wine', 'meat', 'ambience']
 
     sentiments = []
@@ -407,7 +409,70 @@ def main6():
             if sentences:
                 print '%d sentences relevant for category %s' % (len(sentences) 
                                                                  , category)
-                print [type(sent) for sent in sentences]
+                sentiments.append(sentiment_texts(sentences))
+            else:
+                print 'No corresponding sentence.'
+
+            sentences = te.extract_onecat_sentences(lg_reviews, category,
+                                                    token=False)
+            if sentences:
+                print '%d sentences relevant for category %s' % (len(sentences) 
+                                                                 , category)
+                sentiments.append(sentiment_texts(sentences))
+            else:
+                print 'No corresponding sentence.'
+
+    big_toc = timeit.default_timer()
+    print 'Duration %.3f' % (big_toc - big_tic)
+    print 'Summary:'
+    for i in xrange(len(categories)):
+        print sentiments[2 * i]
+        print sentiments[2 * i + 1]
+
+def main7():
+    '''
+    Testing NPSentimentAnalysis using a model trained on a small
+    subset of data.
+    '''
+
+    client = MongoClient()
+    coll = client.opentable.clean2
+
+    model_path = '../../data/topics_5.pkl'
+
+    te = dill.load(open(model_path, 'rb'))
+
+    dic = categorize()
+    te._define_categories(dic)
+    
+    # Test with a random restaurant: 'Mezcal' (127 reviews)
+    # coll.find({'rest_name': 'Mezcal'}, {}).count()
+    # Problem with this restaurant: no review saved?!?
+    # Another: 'Pink', 6 reviews
+    # restos = ["Pink", "Harris'"]
+    restos = ["Pink"]
+    categories = ['wine', 'meat', 'ambience']
+
+    sentiments = []
+    big_tic = timeit.default_timer()
+    for resto in restos:
+        cursor = coll.find({'rest_name': resto}, {'review': 1, '_id': 0})
+        reviews = []
+        for dic in cursor:
+            reviews.append(dic['review'])
+        print '%d reviews for %s' % (len(reviews), resto)
+
+        # Restricting to longer reviews
+        lg_reviews = [review for review in reviews if len(review) > 100]
+        print '%d reviews for %s' % (len(lg_reviews), resto)
+
+        # Restricting to categories
+        for category in categories:
+            sentences = te.extract_onecat_sentences(reviews, category, dic,
+                                                    token=False)
+            if sentences:
+                print '%d sentences relevant for category %s' % (len(sentences) 
+                                                                 , category)
                 sentiments.append(sentiment_texts(sentences))
             else:
                 print 'No corresponding sentence.'

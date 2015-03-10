@@ -1,5 +1,6 @@
 import numpy as np 
 import pandas as pd 
+from itertools import izip
 import re
 import matplotlib.pyplot as plt 
 # from collections import defaultdict
@@ -148,6 +149,9 @@ class AvgSentimentAnalysis(object):
         max_sentiment = np.array(max_sentiment)
         min_sentiment = np.array(min_sentiment)
         
+        # TODO: instead of returning aggregate, return top n
+        # and bottom n sentiments per category with the associated
+        # sentence
         return (avg_sentiment.mean(axis=0), 
                 max_sentiment.mean(axis=0),
                 min_sentiment.mean(axis=0))
@@ -167,7 +171,7 @@ class BlobSentimentAnalysis(object):
         # return sentiment.p_pos, sentiment.p_neg Only for NaiveBayes
         return sentiment[0], sentiment[1]
 
-    def sentiment_sentences(self, sentences):
+    def sentiment_sentences(self, sentences, n=5):
         sentiment = []
         cnt = 0
         for sentence in sentences:
@@ -176,10 +180,18 @@ class BlobSentimentAnalysis(object):
                 if not (cnt % 10):
                     print '%d sentences analysed' % (cnt + 1)
             cnt += 1
+        
         sentiment = np.array(sentiment)
 
-        return (sentiment.mean(axis=0), sentiment.max(axis=0),
-                sentiment.min(axis=0))
+        idx_pos = np.argsort(sentiment[0, :])[-1:-(n+1):-1]
+        idx_neg = np.argsort(sentiment[1, :])[:n]
+        top = [sentences[i] for i in idx_pos]
+        bottom = [sentences[i] for i in idx_neg]
+
+        # return (sentiment.mean(axis=0), sentiment.max(axis=0),
+        #         sentiment.min(axis=0))
+        return ([tup for tup in izip(sentiment[idx_pos][], top)],
+                [tup for tup in izip(sentiment[idx_neg], bottom)])
 
 
 class NPSentimentAnalysis(object):
@@ -246,7 +258,7 @@ class NPSentimentAnalysis(object):
                 s_j = self.majoritary_sentiment(s_j)
                 if s_n < 0:
                     s_n = s_n - (1 + s_n) * abs(s_j)
-                elif s_j > 0::
+                elif s_j > 0:
                     s_n = s_n + (1 - s_n) * s_j
                 else:
                     s_n = s_a
