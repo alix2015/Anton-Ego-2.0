@@ -79,6 +79,7 @@ def build_model_mongo(n_topics,
                       max_iter,
                       model_filename,
                       verbose=False,
+                      fraction=None,
                       top_filename=None):
     
     client = MongoClient()
@@ -104,6 +105,11 @@ def build_model_mongo(n_topics,
         cnt += 1
         if not (cnt % 50):
             print '%d reviews read' % (cnt + 1)
+
+    if fraction:
+        n_rev = int(fraction * len(reviews))
+        idx = np.random.random_integers(0, len(reviews) - 1, n_rev)
+        reviews = [reviews[i] for i in idx]
 
     if top_filename:
         top_words = te.extract_top_words(reviews,
