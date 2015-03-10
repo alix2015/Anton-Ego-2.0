@@ -14,6 +14,7 @@ from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 from processing_data import TopicExtraction
 from sentiment_analysis import SentimentWords, AvgSentimentAnalysis
+from sentiment_analysis import BlobSentimentAnalysis
 import dill
 import timeit
 
@@ -340,8 +341,93 @@ def main5():
 
     print 'Building model in %3.f seconds' % (toc - tic)
 
+def sentiment_texts(reviews, text=True):
+    
+    blob_sent = BlobSentimentAnalysis(verbose=True)
+    # NaiveBayesAnalyzer very slow
+    # blob_sent = BlobSentimentAnalysis(analyzer=NaiveBayesAnalyzer,
+    #                                   verbose=True)
 
+    if text: 
+        reviews = [item for review in reviews for item in
+                     sent_tokenize(review)]
+    
+    tic = timeit.default_timer()
+    sentiment = blob_sent.sentiment_sentences(reviews)
+    toc = timeit.default_timer()
+    print 'Sentiment'
+    print sentiment
+    print 'Duration: %.3f' % (toc - tic)
+
+    return sentiment
+
+def main6():
+    '''
+    Testing BlobSentimentAnalysis using a model trained on a small
+    subset of data.
+    '''
+
+    client = MongoClient()
+    coll = client.opentable.clean2
+
+    model_path = '../../data/topics_5.pkl'
+
+    te = dill.load(open(model_path, 'rb'))
+
+    dic = categorize()
+    te._define_categories(dic)
+    print te.category['wine']
+
+    print dic['wine']
+
+    # Test with a random restaurant: 'Mezcal' (127 reviews)
+    # coll.find({'rest_name': 'Mezcal'}, {}).count()
+    # Problem with this restaurant: no review saved?!?
+    # Another: 'Pink', 6 reviews
+    restos = ["Pink", "Harris'"]
+    categories = ['wine', 'meat', 'ambience']
+
+    sentiments = []
+    big_tic = timeit.default_timer()
+    for resto in restos:
+        cursor = coll.find({'rest_name': resto}, {'review': 1, '_id': 0})
+        reviews = []
+        for dic in cursor:
+            reviews.append(dic['review'])
+        print '%d reviews for %s' % (len(reviews), resto)
+
+        # Restricting to longer reviews
+        lg_reviews = [review for review in reviews if len(review) > 100]
+        print '%d reviews for %s' % (len(lg_reviews), resto)
+
+        # Restricting to categories
+        for category in categories:
+            sentences = te.extract_onecat_sentences(reviews, category, dic,
+                                                    token=False)
+            if sentences:
+                print '%d sentences relevant for category %s' % (len(sentences) 
+                                                                 , category)
+                print [type(sent) for sent in sentences]
+                sentiments.append(sentiment_texts(sentences))
+            else:
+                print 'No corresponding sentence.'
+
+            sentences = te.extract_onecat_sentences(lg_reviews, category,
+                                                    token=False)
+            if sentences:
+                print '%d sentences relevant for category %s' % (len(sentences) 
+                                                                 , category)
+                sentiments.append(sentiment_texts(sentences))
+            else:
+                print 'No corresponding sentence.'
+
+    big_toc = timeit.default_timer()
+    print 'Duration %.3f' % (big_toc - big_tic)
+    print 'Summary:'
+    for i in xrange(len(categories)):
+        print sentiments[2 * i]
+        print sentiments[2 * i + 1]
 
    
 if __name__ == '__main__':
-    main5()
+    main6()

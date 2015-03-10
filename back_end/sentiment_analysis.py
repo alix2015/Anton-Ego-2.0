@@ -153,3 +153,143 @@ class AvgSentimentAnalysis(object):
                 min_sentiment.mean(axis=0))
                
 
+class BlobSentimentAnalysis(object):
+    def __init__(self, analyzer=None, verbose=False):
+        self.analyzer = analyzer
+        self.verbose = verbose
+        
+    def sentiment(self, sentence):
+        if self.analyzer:
+            blob = TextBlob(sentence, analyzer=self.analyzer)
+        else:
+            blob = TextBlob(sentence)
+        sentiment = blob.sentiment
+        # return sentiment.p_pos, sentiment.p_neg Only for NaiveBayes
+        return sentiment[0], sentiment[1]
+
+    def sentiment_sentences(self, sentences):
+        sentiment = []
+        cnt = 0
+        for sentence in sentences:
+            sentiment.append(self.sentiment(sentence))
+            if self.verbose:
+                if not (cnt % 10):
+                    print '%d sentences analysed' % (cnt + 1)
+            cnt += 1
+        sentiment = np.array(sentiment)
+
+        return (sentiment.mean(axis=0), sentiment.max(axis=0),
+                sentiment.min(axis=0))
+
+
+class NPSentimentAnalysis(object):
+    def __init__(self, sentWords):
+        self.sentWords = sentWords
+        self.grammar_np = r"""
+                        NBAR:
+                            {<NN.*|JJ.*>*<NN.*>} 
+                            # Nouns and Adjectives, terminated with Nouns
+                            
+                        NP:
+                            {<NBAR><IN|CC><NBAR>} 
+                            # Above, connected with in/of/etc...
+                            {<NBAR>}
+                        """
+        self.grammar_vp = r"""
+                        NBAR:
+                            {<NN.*|JJ>*<NN.*>}
+                            
+                        NP:
+                            {<DT>*<NBAR><IN|CC><NBAR>}
+                            {<DT>*<NBAR>}
+
+                        VP:
+                            {<NP>*<RB>*<VB.*><RB>*<VB.*>*<NP|JJ>*}
+                        """
+
+    # def get_word(self, pos_tokens, filter):
+    #     for token in pos_tokens:
+    #         if token[1] in filter:
+    #             yield token[0]
+
+    def dependencies_parser(self, sentence, kind='NP'):
+        tokens = word_tokenize(sentence)
+        if kind == 'NP':
+            tree = RegexpTokenizer(self.grammar_np).parse(pos_tag(tokens))
+
+        if kind == 'VP':
+            tree = RegexpTokenizer(self.grammar_vp).parse(pos_tag(tokens))
+
+    def majoritary_sentiment(self, scores):
+        scores = np.array(scores)
+        return scores[np.argsort(abs(scores))[-1]]
+
+    def np_leaves(self, tree):
+        for subtree in tree.subtrees(filter=lambda t: t.label()=='NP'):
+            yield subtree.leaves()
+
+    def np_sentiment(self, tree):
+        sentiment = []
+        for leaves in self.np_leaves(tree):
+            s_n = []
+            s_j = []
+            s_r = []
+            for token in leaves:
+                if re.match(r'NN.*', token[1]):
+                    s_n.append(self.sentWords.get_score(token[0]))
+                if re.match(r'JJ.*', token[1]):
+                    s_j.append(self.sentWords.get_score(token[0]))
+                if re.match(r'RB', token[1]):
+                    s_r.append(self.sentWords.get_score(token[0]))
+            s_n = self.majoritary_sentiment(s_n)
+            if s_j:
+                s_j = self.majoritary_sentiment(s_j)
+                if s_n < 0:
+                    s_n = s_n - (1 + s_n) * abs(s_j)
+                elif s_j > 0::
+                    s_n = s_n + (1 - s_n) * s_j
+                else:
+                    s_n = s_a
+
+            if s_r:
+                s_r = self.majoritary_sentiment(s_r)
+                s_n = - np.sign(s_n) * (abs(s_n) * (1 - abs(s_n)))
+            sentiment.append(s_n)
+        
+        return self.majoritary_sentiment(sentiment)
+
+    def vp_leaves(self, tree):
+        for subtree in tree.subtrees(filter=lambda t: t.label()=='VP'):
+            yield subtree.leaves()
+
+    def vp_sentiment(self, tree):
+        sentiment = []
+        for leaves in self.vp_leaves(tree):
+            s_v = []
+            s_n = []
+            s_r = []
+            for token in leaves:
+                if re.match(r'VV.*', token[1]):
+                    s_r.appent(self.sentWords.get_score(token[0]))
+                if re.match(r'NN.*', token[1]):
+                    s_n.append(self.sentWords.get_score[0])
+                if re.match(r'RB', token[1]):
+                    s_r.append(self.sentWords.get_score[0])
+            s_v = self.majoritary_sentiment(s_v)
+            if s_n:
+                s_n = self.majoritary_sentiment(s_n)
+                if s_v > 0:
+                    s_v = np.sign(s_n) * (abs(s_n) + (1 - abs(s_n)) * s_v)
+                elif s_n < 0:
+                    s_v = np.sign(s_n) * (abs(s_n) + (1 - abs(s_n)) * s_v)
+            if s_r:
+                s_r = self.majoritary_sentiment(s_r)
+                if s_v < 0:
+                    s_v = - (abs(s_v) + (1 - abs(s_v)) * abs(s_r))
+                elif s_r > 0:
+                    s_v = abs(s_v) + (1 - abs(s_v)) * abs(s_r)
+                else:
+                    s_v = s_r
+            sentiment.append(s_v)
+
+        return self.majoritary_sentiment(sentiment)

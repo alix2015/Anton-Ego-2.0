@@ -212,15 +212,17 @@ class TopicExtraction(object):
         return top_words
 
 
-    def extract_onecat_sentences(self, texts, category, dic=None):
+    def extract_onecat_sentences(self, texts, category, dic=None, token=True):
         '''
-        INPUT: TopicExtraction object, list of strings, string, <dictionary>
+        INPUT: TopicExtraction object, list of strings, string, 
+        <dictionary, boolean>
         OUTPUT: list of list of strings
 
         This method extracts from a test set of documents the sentences
         relevant to the given category. If the category attribute of
         the TopicExtraction object has not been initialized a dictionary
-        should be provided.
+        should be provided. If token, sentences are tokenized, otherwise
+        they are returned as are.
         '''
         if not self.category:
             if dic:
@@ -228,6 +230,7 @@ class TopicExtraction(object):
             else:
                 print 'Please provide a dictionary to initialize the categories'
                 return
+
         texts = [sent for item in [sent_tokenize(text) for text in texts]\
                  for sent in item]
         V = self.vectorizer.transform(texts)
@@ -235,7 +238,12 @@ class TopicExtraction(object):
 
         for topic in self.category[category]:
             idx = np.argsort(W[:, topic])[-1:-16:-1]
-            docs = [self.my_tokenize(texts[i]) for i in idx]
+            if token:
+                docs = [self.my_tokenize(texts[i]) for i in idx]
+            else:
+                docs = [texts[i] for i in idx]
 
         return docs
+
+
 
