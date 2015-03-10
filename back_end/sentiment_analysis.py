@@ -190,8 +190,8 @@ class BlobSentimentAnalysis(object):
 
         # return (sentiment.mean(axis=0), sentiment.max(axis=0),
         #         sentiment.min(axis=0))
-        return ([tup for tup in izip(sentiment[idx_pos][], top)],
-                [tup for tup in izip(sentiment[idx_neg], bottom)])
+        return ([tup for tup in izip(sentiment[0, idx_pos], top)],
+                [tup for tup in izip(sentiment[1, idx_neg], bottom)])
 
 
 class NPSentimentAnalysis(object):
