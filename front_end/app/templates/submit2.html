@@ -1,0 +1,27 @@
+{% extends "home.html" %}
+
+{% block title %}Search | The Critic{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block header %}
+	{{ super() }}
+{% endblock %}
+{% block content %}
+	<h1 class="cover-heading">Ask the Critic</h1>
+  <p class="lead">Please input the name of the restaurant you
+    are interested in:</p>
+  <p class="lead">
+    <form class="form-inline" role="form" action="/topic" method="POST">
+      <div class="form-group">
+        <label for="input">Restaurant name</label>
+        <input type="search" name="user_input" class="form-control" id="search">
+      </div>
+      <button type="submit" class="btn btn-default">Search</button>
+    </form>
+
+  </p>
+{% endblock %}
+{% block footer %}
+	{{ super() }}
+{% endblock %}

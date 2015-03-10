@@ -21,7 +21,7 @@ def home():
 #============================================
 @app.route('/submit_page')
 def submission_page():
-    return render_template('submit.html')
+    return render_template('submit2.html')
     # return '''
     # <form action="/topic" method='POST' >
     #     <input type="text" name="user_input" />
@@ -36,14 +36,31 @@ def predict_page():
     # get data from request form, the key is the name you set in your form
     # TODO: 'Sorry, the Critic has not yet visited this restaurant'
     rest_name = request.form['user_input']
-    # rest_link = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
+    # cursor = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
+    # rest_link = cursor['url']
+    # cursor = coll.find({'rest_name': rest_name}, {'reviews': 1, '_id': 0})
+    # top1, top2, top3, top4, top5 = te.top_categories(reviews)
+    # mongo query for ratings
+    # rating, food, service, ambience = 
+    topA = 'steak'
+    topB = 'birthday'
+    topC = 'wine'
+    topD = 'location'
+    topE = 'date'
     rest_link = 'http://www.opentable.com/lardoise'
-    return render_template('result2.html',
-                           rest_name=rest_name,
-                           rest_link=rest_link)
-
-@app.route('/food', methods=['POST'])
-def detail_food():
+    rating = 4.0
+    rating_food = 4.5
+    rating_service = 3.2
+    rating_ambience = 4.1
+    return render_template('result2a.html', rest_name=rest_name,
+                           rest_link=rest_link, topA=topA, topB=topB, topC=topC,
+                           topD=topD, topE=topE, rating=rating,
+                           rating_food=rating_food, rating_service=rating_service,
+                           rating_ambience=rating_ambience)
+    
+    
+@app.route('/topic/<category>', methods=['POST'])
+def detail():
     rest_name = request.form['user_input']
     # rest_link = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
     rest_link = 'http://www.opentable.com/lardoise'
@@ -51,6 +68,17 @@ def detail_food():
                            rest_name=rest_name,
                            rest_link=rest_link)
 
+# INFO PAGE
+#============================================
+@app.route('/info')
+def info_page():
+    return render_template('info2.html')
+
+# INFO PAGE
+#============================================
+@app.route('/contact')
+def contact_page():
+    return render_template('contact2.html')
 
 
 
