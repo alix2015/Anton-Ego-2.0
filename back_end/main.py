@@ -482,35 +482,6 @@ def main6():
         f.write('Total duration %.3f' % (big_toc - big_tic))
     f.close()
 
-    # Joining the reviews for each restaurants so that there are fewer docs
-    # reviews = []
-    # for r in rest_reviews:
-    #     reviews.append(' '.join(rest_reviews[r]))
-
-    # rest_names = rest_reviews.keys()
-    # n_topics = 100
-    # ngram_range = (2, 2)
-    # max_words = 5000
-    # max_iter = 400
-    # verbose = True
-    
-    # top_filename = 'te_3_%d_%dgram_max_%d_100_s.txt' % \
-    #                 (n_topics, ngram_range[1], max_words)
-
-    # model_filename = '../front_end/data/te_2.pkl'
-
-    # tic = timeit.default_timer()
-    # te = TopicExtraction(rest_names=rest_names,
-    #                      n_topics=n_topics,
-    #                      sentence=True,
-    #                      ngram_range=ngram_range,
-    #                      max_words=max_words,
-    #                      max_iter=max_iter,
-    #                      verbose=verbose)
-
-    # toc = timeit.default_timer()
-    # print 'Building model in %3.f seconds' % (toc - tic)
-    
    
 if __name__ == '__main__':
     main6()
