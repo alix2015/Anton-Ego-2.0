@@ -64,22 +64,23 @@
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
             <li class="active"><a href="#">Categories <span class="sr-only">(current)</span></a></li>
-            <li><a href="/topic/food">Food</a></li>
-            <li><a href="/topic/service">Service</a></li>
-            <li><a href="/topic/ambience">Ambience</a></li>
+            <li><a data-toggle="collapse" data-target="#food">Food</a></li>
+            <li><a data-toggle="collapse" data-target="#service">Service</a></li>
+            <li><a data-toggle="collapse" data-target="#ambience">Ambience</a>
+            </li>
           </ul>
           <ul class="nav nav-sidebar">
-            <li><a href="/topic/top1">{{topA}}</a></li>
-            <li><a href="/topic/top2">{{topB}}</a></li>
-            <li><a href="/topic/top3">{{topC}}</a></li>
-            <li><a href="/topic/top4">{{topD}}</a></li>
-            <li><a href="/topic/top5">{{topE}}</a></li>
+            <li><a data-toggle="collapse" data-target="#{{topA}}">{{topA}}</a>
+            </li>
+            <li><a data-toggle="collapse" data-target="#{{topB}}">{{topB}}</a>
+            </li>
+            <li><a data-toggle="collapse" data-target="#{{topC}}">{{topC}}</a>
+            </li>
+            <li><a data-toggle="collapse" data-target="#{{topD}}">{{topD}}</a>
+            </li>
+            <li><a data-toggle="collapse" data-target="#{{topE}}">{{topE}}</a>
+            </li>
           </ul>
-          <!-- <ul class="nav nav-sidebar">
-            <li><a href="">Nav item again</a></li>
-            <li><a href="">One more nav</a></li>
-            <li><a href="">Another nav item</a></li>
-          </ul> -->
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-12 col-md-offset-2 main">
           {% block content%}
@@ -90,7 +91,8 @@
               <img src="../static/img/test_experience.png" class="img-responsive" alt="Wordcloud of food">
               <h4>Food</h4>
               <span class="text-muted">Rating: {{rating_food}}</span>
-              <p><a class="btn btn-outline btn-lg" href="/topic/food">
+              <p><a class="btn btn-outline btn-lg" data-toggle="collapse" 
+                data-target="#food">
                 View details »</a>
             </div>
             <div class="col-xs-6 col-sm-3 placeholder">
@@ -98,7 +100,8 @@
               alt="Wordcloud of service">
               <h4>Service</h4>
               <span class="text-muted">Rating: {{rating_service}}</span>
-              <p><a class="btn btn-outline btn-lg" href="/topic/service">
+              <p><a class="btn btn-outline btn-lg" data-toggle="collapse" 
+                data-target="#service">
                 View details »
               </a>
             </div>
@@ -107,10 +110,51 @@
               alt="Wordcloud of ambience">
               <h4>Ambience</h4>
               <span class="text-muted">Rating: {{rating_ambience}}</span>
-              <p><a class="btn btn-outline btn-lg" href="/topic/ambience">
+              <p><a class="btn btn-outline btn-lg" data-toggle="collapse" 
+                data-target="#ambience">
                 View details »
               </a></p>
             </div>
+          </div>
+
+          
+          <div id="food" class="collapse">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat.
+          </div>
+
+          <div id="service" class="collapse">
+            Carthago delenda.
+          </div>
+
+          <div id="ambience" class="collapse">
+            Ilum absens absentem auditque videtque
+          </div>
+
+          <div id={{topA}} class="collapse">
+            Alea jacta
+          </div>
+
+          <div id={{topB}} class="collapse">
+            Animale triste
+          </div>
+
+          <div id={{topC}} class="collapse">
+            De rerum natura
+          </div>
+
+          <div id={{topC}} class="collapse">
+            Tusculanae
+          </div>
+
+          <div id={{topD}} class="collapse">
+            Principia mathematica
+          </div>
+
+          <div id={{topE}} class="collapse">
+            De bello gallico
           </div>
 
           <!-- <h2 class="sub-header">Section title</h2>

@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template
-# from pymongo import MongoDB
+# from pymongo import MongoClient
 
+# client = MongoClient()
+# coll = client.opentable.clean2
 
 PORT = 8888
 
@@ -14,20 +16,13 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('home.html')
-    # return '<h1> Welcome to this page </h1>'
-
+    
 
 # QUERY PAGE
 #============================================
 @app.route('/submit_page')
 def submission_page():
     return render_template('submit2.html')
-    # return '''
-    # <form action="/topic" method='POST' >
-    #     <input type="text" name="user_input" />
-    #     <input type="submit" />
-    # </form>
-    # '''
 
 # RESULT PAGE
 #============================================
@@ -59,14 +54,14 @@ def predict_page():
                            rating_ambience=rating_ambience)
     
     
-@app.route('/topic/<category>', methods=['POST'])
+@app.route('/topic/detail', methods=['POST'])
 def detail():
-    rest_name = request.form['user_input']
+    rest_name = todo #request.form['user_input']
+    category = request.a['category']
     # rest_link = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
     rest_link = 'http://www.opentable.com/lardoise'
-    return render_template('result_food.html',
-                           rest_name=rest_name,
-                           rest_link=rest_link)
+    return render_template('result_detail.html', rest_name=rest_name,
+                           rest_link=rest_link, category=category)
 
 # INFO PAGE
 #============================================
