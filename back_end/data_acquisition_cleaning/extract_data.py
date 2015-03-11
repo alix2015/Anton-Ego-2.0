@@ -9,9 +9,8 @@ import timeit
 
 class ExtractData(object):
     '''
-    For the small dataset I was usind during the first week,
-    I used a dataframe. I have now processed the larger datasets
-    (training and test) using to_mongo.
+    For small datasets, dataframes can be used.
+    For larger datasets, Mongo database is more adapted.
     '''
     def __init__(self):
         self.client = MongoClient()
@@ -137,9 +136,7 @@ class ExtractData(object):
 
 def main1():
     filename = '../data/reviews_SF.pkl'
-    
     ed = ExtractData()
-
     df = ed.to_dataframe(filename)
 
     print df.shape

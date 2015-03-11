@@ -66,15 +66,23 @@ class TopicExtraction(object):
         tokenizing
         '''
         text = text.lower().encode('ascii', errors='ignore')
-        rest_names = ' '.join(self.rest_names).lower()\
-                    .encode('ascii', errors='ignore')
         # list_tokenized = RegexpTokenizer(r'\w+').tokenize(text)
         list_tokenized = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
                                          gaps=True).tokenize(text)
-        rest_names = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
-                                     gaps=True).tokenize(rest_names)
-        for name in rest_names:
-            self.stopwords.append(name)
+        if self.rest_names:
+            if self.verbose:
+                tic = timeit.default_timer()
+            rest_names = ' '.join(self.rest_names).lower()\
+                        .encode('ascii', errors='ignore')
+            rest_names = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
+                                         gaps=True).tokenize(rest_names)
+            for name in rest_names:
+                self.stopwords.append(name)
+            self.rest_names = None # TO AVOID REPROCESSING
+            self.stopwords = set(self.stopwords)
+            if self.verbose:
+                tac = timeit.default_timer()
+                print 'Adding restaurants in %d seconds' % (tac - tic)
         list_tokenized = [word for word in list_tokenized\
                             if word not in self.stopwords]
         
@@ -264,7 +272,7 @@ class TopicExtraction(object):
 
         if not self.category:
             if dic:
-                self.._define_categories(dic)
+                self._define_categories(dic)
             else:
                 print 'Please provide a dictionary to initialize the categories'
                 return

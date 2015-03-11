@@ -129,53 +129,53 @@ def build_model_mongo(n_topics,
     return te
 
 
-def categorize():
-    dic = {}
-    dic['food'] = {4, 6, 7, 21, 24, 32, 34, 35, 2, 36, 25, 37,
-                            38, 39, 40, 41, 42, 44, 47, 48, 53, 54, 55,
-                            56, 65, 68, 69, 70, 73, 75, 79, 85, 91, 93,
-                            95, 97}
-    dic['service'] = {5, 9, 15, 18, 19, 45, 58, 60, 62, 66, 71,
-                                72, 81, 90, 94, 98}
-    dic['ambience'] = {10, 16, 20, 26, 31, 61, 64}
+# def categorize():
+#     dic = {}
+#     dic['food'] = {4, 6, 7, 21, 24, 32, 34, 35, 2, 36, 25, 37,
+#                             38, 39, 40, 41, 42, 44, 47, 48, 53, 54, 55,
+#                             56, 65, 68, 69, 70, 73, 75, 79, 85, 91, 93,
+#                             95, 97}
+#     dic['service'] = {5, 9, 15, 18, 19, 45, 58, 60, 62, 66, 71,
+#                                 72, 81, 90, 94, 98}
+#     dic['ambience'] = {10, 16, 20, 26, 31, 61, 64}
     
-    dic['wine'] = {2, 36}
-    dic['cocktail'] = {25, 36}
-    dic['steak'] = {21}
-    dic['Chinese'] = {24}
-    dic['French'] = {47, 87}
-    dic['cheese'] = {34, 97}
-    dic['dessert'] = {35, 40, 95}
-    dic['vegetables'] = {37}
-    dic['meat'] = {42, 44, 47, 49, 51, 53, 69, 70, 85, 91}
-    dic['pork'] = {51}
-    dic['steak'] = {49, 53, 69, 70, 85}
-    dic['egg'] = {44}
-    dic['potato'] = {44, 48}
-    dic['entree'] = {38, 39}
-    dic['layout'] = {16, 26}
-    dic['noise'] = {17, 64, 82}
-    dic['music'] = {64, 82}
-    dic['location'] = {26, 50, 52, 76, 77}
-    dic['vegetarian'] = {56, 87}
-    dic['salad'] = {87}
-    dic['brunch'] = {65, 90}
-    dic['Mediterranean'] = {73}
-    dic['Indian'] = {79}
+#     dic['wine'] = {2, 36}
+#     dic['cocktail'] = {25, 36}
+#     dic['steak'] = {21}
+#     dic['Chinese'] = {24}
+#     dic['French'] = {47, 87}
+#     dic['cheese'] = {34, 97}
+#     dic['dessert'] = {35, 40, 95}
+#     dic['vegetables'] = {37}
+#     dic['meat'] = {42, 44, 47, 49, 51, 53, 69, 70, 85, 91}
+#     dic['pork'] = {51}
+#     dic['steak'] = {49, 53, 69, 70, 85}
+#     dic['egg'] = {44}
+#     dic['potato'] = {44, 48}
+#     dic['entree'] = {38, 39}
+#     dic['layout'] = {16, 26}
+#     dic['noise'] = {17, 64, 82}
+#     dic['music'] = {64, 82}
+#     dic['location'] = {26, 50, 52, 76, 77}
+#     dic['vegetarian'] = {56, 87}
+#     dic['salad'] = {87}
+#     dic['brunch'] = {65, 90}
+#     dic['Mediterranean'] = {73}
+#     dic['Indian'] = {79}
     
-    dic['excellent'] = {3, 5, 18, 20, 25, 27, 29, 33, 34, 96, 99}
-    dic['positive sentiment'] = {9, 10, 11, 12, 15, 19, 
-                                 22, 28, 45, 46, 54, 59, 60, 62,
-                                 63, 66, 68, 80, 81, 86, 90, 94}
-    dic['negative sentiment'] = {46, 58, 71, 94}
-    dic['experience'] = {8, 78, 92}
-    dic['positive recommendation'] = {13, 23, 30, 74, 83}
-    dic['special occasion'] = {14, 31, 43, 59, 74, 84, 89}
-    dic['reservation'] = {60}
-    dic['price'] = {67}
-    dic['cook'] = {68, 75}
+#     dic['excellent'] = {3, 5, 18, 20, 25, 27, 29, 33, 34, 96, 99}
+#     dic['positive sentiment'] = {9, 10, 11, 12, 15, 19, 
+#                                  22, 28, 45, 46, 54, 59, 60, 62,
+#                                  63, 66, 68, 80, 81, 86, 90, 94}
+#     dic['negative sentiment'] = {46, 58, 71, 94}
+#     dic['experience'] = {8, 78, 92}
+#     dic['positive recommendation'] = {13, 23, 30, 74, 83}
+#     dic['special occasion'] = {14, 31, 43, 59, 74, 84, 89}
+#     dic['reservation'] = {60}
+#     dic['price'] = {67}
+#     dic['cook'] = {68, 75}
 
-    return dic
+#     return dic
 
 
 def main1():
@@ -484,4 +484,4 @@ def main6():
 
    
 if __name__ == '__main__':
-    main5()
+    main6()
