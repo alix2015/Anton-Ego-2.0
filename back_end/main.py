@@ -17,6 +17,8 @@ from sentiment_analysis import SentimentWords, AvgSentimentAnalysis
 from sentiment_analysis import BlobSentimentAnalysis
 import dill
 import timeit
+from collections import defaultdict
+import random
 
 '''
 This file is used for the ongoing running and testing.
@@ -374,8 +376,8 @@ def sentiment_texts(reviews, text=True):
     tic = timeit.default_timer()
     sentiment = blob_sent.sentiment_sentences(reviews)
     toc = timeit.default_timer()
-    print 'Sentiment'
-    print sentiment
+    # print 'Sentiment'
+    # print sentiment
     print 'Duration: %.3f' % (toc - tic)
 
     return sentiment
@@ -390,127 +392,125 @@ def main6():
     coll = client.opentable.clean2
 
     model_path = '../../data/topics_5.pkl'
-
     te = dill.load(open(model_path, 'rb'))
 
     dic = categorize()
     te._define_categories(dic)
-    print te.category['wine']
 
-    # print dic['wine']
-
-    # Test with a random restaurant: 'Mezcal' (127 reviews)
-    # coll.find({'rest_name': 'Mezcal'}, {}).count()
-    # Problem with this restaurant: no review saved?!?
-    # Another: 'Pink', 6 reviews
-    # restos = ["Pink", "Harris'"]
-    restos = ["Pink"]
-    categories = ['wine', 'meat', 'ambience']
-
-    sentiments = []
-    big_tic = timeit.default_timer()
-    for resto in restos:
-        cursor = coll.find({'rest_name': resto}, {'review': 1, '_id': 0})
-        reviews = []
-        for dic in cursor:
-            reviews.append(dic['review'])
-        print '%d reviews for %s' % (len(reviews), resto)
-
-        # Restricting to longer reviews
-        lg_reviews = [review for review in reviews if len(review) > 100]
-        print '%d reviews for %s' % (len(lg_reviews), resto)
-
-        # Restricting to categories
-        for category in categories:
-            sentences = te.extract_onecat_sentences(reviews, category, dic,
-                                                    token=False)
-            if sentences:
-                print '%d sentences relevant for category %s' % (len(sentences) 
-                                                                 , category)
-                sentiments.append(sentiment_texts(sentences))
-            else:
-                print 'No corresponding sentence.'
-
-            sentences = te.extract_onecat_sentences(lg_reviews, category,
-                                                    token=False)
-            if sentences:
-                print '%d sentences relevant for category %s' % (len(sentences) 
-                                                                 , category)
-                sentiments.append(sentiment_texts(sentences))
-            else:
-                print 'No corresponding sentence.'
-
-    big_toc = timeit.default_timer()
-    print 'Duration %.3f' % (big_toc - big_tic)
-    print 'Summary:'
-    for i in xrange(len(categories)):
-        print sentiments[2 * i]
-        print sentiments[2 * i + 1]
-
-def main7():
-    '''
-    Testing NPSentimentAnalysis using a model trained on a small
-    subset of data.
-    '''
-
-    client = MongoClient()
-    coll = client.opentable.clean2
-
-    model_path = '../../data/topics_5.pkl'
-
-    te = dill.load(open(model_path, 'rb'))
-
-    dic = categorize()
-    te._define_categories(dic)
+    results_path = '../../data/sentiments_main6.txt'
     
     # Test with a random restaurant: 'Mezcal' (127 reviews)
     # coll.find({'rest_name': 'Mezcal'}, {}).count()
     # Problem with this restaurant: no review saved?!?
-    # Another: 'Pink', 6 reviews
-    # restos = ["Pink", "Harris'"]
-    restos = ["Pink"]
-    categories = ['wine', 'meat', 'ambience']
+    # Random sample of restaurants
+    rest_reviews = defaultdict(list)
+    cursor = coll.find({'review_length': {'$gt': 150}}, 
+                       {'rest_name': 1, 'review': 1})
+    for dic in cursor:
+        name = dic['rest_name'].encode('ascii', errors='ignore')
+        review = dic['review'].encode('ascii', errors='ignore')
+        rest_reviews[name].append(review)
+    rest_sample = random.sample(set(rest_reviews.keys()), 20)
+    categories = ['food', 'service', 'ambience', 'special occasion',
+                  'excellent']
 
-    sentiments = []
-    big_tic = timeit.default_timer()
-    for resto in restos:
-        cursor = coll.find({'rest_name': resto}, {'review': 1, '_id': 0})
-        reviews = []
-        for dic in cursor:
-            reviews.append(dic['review'])
-        print '%d reviews for %s' % (len(reviews), resto)
+    
+    with open(results_path, 'w') as f:
+        big_tic = timeit.default_timer()
+        for resto in rest_sample:
+            cursor = coll.find({'rest_name': resto}, {'review': 1, '_id': 0})
+            reviews = []
+            for dic in cursor:
+                reviews.append(dic['review'])
+            f.write('%d reviews for %s' % (len(reviews), resto))
 
-        # Restricting to longer reviews
-        lg_reviews = [review for review in reviews if len(review) > 100]
-        print '%d reviews for %s' % (len(lg_reviews), resto)
+            # Restricting to longer reviews
+            lg_reviews = [review for review in reviews if len(review) > 100]
+            f.write('%d long reviews for %s' % (len(lg_reviews), resto)) 
 
-        # Restricting to categories
-        for category in categories:
-            sentences = te.extract_onecat_sentences(reviews, category, dic,
-                                                    token=False)
-            if sentences:
-                print '%d sentences relevant for category %s' % (len(sentences) 
-                                                                 , category)
-                sentiments.append(sentiment_texts(sentences))
-            else:
-                print 'No corresponding sentence.'
+            # Restricting to categories
+            for category in categories:
+                tic = timeit.default_timer()
+                sentences = te.extract_onecat_sentences(reviews, category, dic,
+                                                        token=False)
+                tac = timeit.default_timer()
+                if sentences:
+                    f.write('%d sentences relevant for category %s' % 
+                            (len(sentences), category))
+                    sentiments = sentiment_texts(sentences)
+                else:
+                    f.write('No corresponding sentence.')
 
-            sentences = te.extract_onecat_sentences(lg_reviews, category,
-                                                    token=False)
-            if sentences:
-                print '%d sentences relevant for category %s' % (len(sentences) 
-                                                                 , category)
-                sentiments.append(sentiment_texts(sentences))
-            else:
-                print 'No corresponding sentence.'
+                toc =timeit.default_timer()
+                f.write('Summary for %s:' % category)
+                f.write('All %d reviews in %.3f + %.3f seconds' %
+                        (len(sentences), tac - tic, toc - tac))
+                f.write('Positive')
+                for i in xrange(len(sentiments[0])):
+                    f.write(str(sentiments[0][i]))
+                f.write('Negative')
+                for i in xrange(len(sentiments[1])):
+                    f.write(str(sentiments[1][i]))
+                f.write('Subjective')
+                for i in xrange(len(sentiments[2])):
+                    f.write(str(sentiments[2][i]))
 
-    big_toc = timeit.default_timer()
-    print 'Duration %.3f' % (big_toc - big_tic)
-    print 'Summary:'
-    for i in xrange(len(categories)):
-        print sentiments[2 * i]
-        print sentiments[2 * i + 1]
+                tic = timeit.default_timer()
+                sentences = te.extract_onecat_sentences(lg_reviews, category,
+                                                        token=False)
+                tac = timeit.default_timer()
+                if sentences:
+                    f.write('%d sentences relevant for category %s' %
+                            (len(sentences), category))
+                    sentiments = sentiment_texts(sentences)
+                else:
+                    f.write('No corresponding sentence.')
+                toc = timeit.default_timer()
+                f.write('Summary for %s:' % category)
+                f.write('%d long reviews in %.3f + %.3f seconds' %
+                        (len(sentences), tac - tic, toc - tac))
+                f.write('Positive')
+                for i in xrange(len(sentiments[0])):
+                    f.write(str(sentiments[0][i]))
+                f.write('Negative')
+                for i in xrange(len(sentiments[1])):
+                    f.write(str(sentiments[1][i]))
+                f.write('Subjective')
+                for i in xrange(len(sentiments[2])):
+                    f.write(str(sentiments[2][i]))
+        big_toc = timeit.default_timer()
+        f.write('Total duration %.3f' % (big_toc - big_tic))
+    f.close()
 
+    # Joining the reviews for each restaurants so that there are fewer docs
+    # reviews = []
+    # for r in rest_reviews:
+    #     reviews.append(' '.join(rest_reviews[r]))
+
+    # rest_names = rest_reviews.keys()
+    # n_topics = 100
+    # ngram_range = (2, 2)
+    # max_words = 5000
+    # max_iter = 400
+    # verbose = True
+    
+    # top_filename = 'te_3_%d_%dgram_max_%d_100_s.txt' % \
+    #                 (n_topics, ngram_range[1], max_words)
+
+    # model_filename = '../front_end/data/te_2.pkl'
+
+    # tic = timeit.default_timer()
+    # te = TopicExtraction(rest_names=rest_names,
+    #                      n_topics=n_topics,
+    #                      sentence=True,
+    #                      ngram_range=ngram_range,
+    #                      max_words=max_words,
+    #                      max_iter=max_iter,
+    #                      verbose=verbose)
+
+    # toc = timeit.default_timer()
+    # print 'Building model in %3.f seconds' % (toc - tic)
+    
    
 if __name__ == '__main__':
-    main5()
+    main6()

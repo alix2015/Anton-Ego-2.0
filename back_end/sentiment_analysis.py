@@ -158,18 +158,14 @@ class AvgSentimentAnalysis(object):
                
 
 class BlobSentimentAnalysis(object):
-    def __init__(self, analyzer=None, verbose=False):
-        self.analyzer = analyzer
+    def __init__(self, verbose=False):
         self.verbose = verbose
         
     def sentiment(self, sentence):
-        if self.analyzer:
-            blob = TextBlob(sentence, analyzer=self.analyzer)
-        else:
-            blob = TextBlob(sentence)
+        #NaiveBayesAnalyzer way too slow: using the default PatternAnalyzer
+        blob = TextBlob(sentence) 
         sentiment = blob.sentiment
-        # return sentiment.p_pos, sentiment.p_neg Only for NaiveBayes
-        return sentiment[0], sentiment[1]
+        return sentiment.polarity, sentiment.subjectivity
 
     def sentiment_sentences(self, sentences, n=5):
         sentiment = []
@@ -183,15 +179,17 @@ class BlobSentimentAnalysis(object):
         
         sentiment = np.array(sentiment)
 
+        #
         idx_pos = np.argsort(sentiment[0, :])[-1:-(n+1):-1]
-        idx_neg = np.argsort(sentiment[1, :])[:n]
-        top = [sentences[i] for i in idx_pos]
-        bottom = [sentences[i] for i in idx_neg]
+        idx_neg = np.argsort(sentiment[0, :])[:n]
+        idx_subj = np.argsort(sentiment[1, :])[-1:-(n+1):-1]
+        pos = [sentences[i] for i in idx_pos]
+        neg = [sentences[i] for i in idx_neg]
+        subj = [sentences[i] for i in idx_subj]
 
-        # return (sentiment.mean(axis=0), sentiment.max(axis=0),
-        #         sentiment.min(axis=0))
-        return ([tup for tup in izip(sentiment[0, idx_pos], top)],
-                [tup for tup in izip(sentiment[1, idx_neg], bottom)])
+        return ([tup for tup in izip(sentiment[0, idx_pos], pos)],
+                [tup for tup in izip(sentiment[0, idx_neg], neg)],
+                [tup for tup in izip(sentiment[1, idx_subj], subj)])
 
 
 class NPSentimentAnalysis(object):

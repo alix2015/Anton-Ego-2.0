@@ -27,6 +27,7 @@ class TopicExtraction(object):
                  ngram_range=(1, 1),
                  max_words=None,
                  max_iter=200,
+                 category=None,
                  verbose=False):
         '''
         INPUT: TopicExtraction object, <list of strings, integer, boolean,
@@ -52,7 +53,7 @@ class TopicExtraction(object):
                               max_iter=self.max_iter)
         self.trained = False
         self.H_ = None
-        self.category = None
+        self.category = category
         self.fonts_ = '/Library/Fonts/Georgia.ttf'
         self.wordcloud = WordCloud(font_path=self.fonts_)
         
@@ -258,6 +259,39 @@ class TopicExtraction(object):
                 docs = [texts[i] for i in idx]
 
         return docs
+
+    def top_categories(self, texts, top_n=5, dic=None):
+
+        if not self.category:
+            if dic:
+                self.._define_categories(dic)
+            else:
+                print 'Please provide a dictionary to initialize the categories'
+                return
+
+        # What are the most relevant categories?
+        # The ones that yield the highest largest projections on
+        # the category subspace
+        
+        texts = [sent for item in [sent_tokenize(text) for text in texts]\
+                 for sent in item]
+        V = self.vectorizer.transform(texts)
+        W = self.factorizor.transform(V)
+
+        max_coef = np.zeros(len(self.category))
+        idx = 0
+        names = []
+        for category in self.category:
+            names.append(category)
+            for topic in self.category[category]:
+                m = max(W[:, topic])
+                if m > max_coef[idx]:
+                    max_coef[idx] = m
+            idx += 1
+
+        names = np.array(names)
+        return names[np.argsort(max_coef)[-1:-(top_n+1):-1]]
+
 
 
 
