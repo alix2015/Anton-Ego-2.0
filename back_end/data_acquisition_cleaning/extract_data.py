@@ -17,7 +17,7 @@ class ExtractData(object):
         self.db = self.client.opentable
         # TODO: not harcoding the name of the collection
         self.collection = self.db.review2
-        self.collectionOut = self.db.clean2
+        self.collectionOut = self.db.clean2a
 
 
     def to_mongo(self):
@@ -48,7 +48,10 @@ class ExtractData(object):
                                           'rating': tup[3],
                                           'food_rating': tup[4],
                                           'service_rating': tup[5],
-                                          'ambience_rating': tup[6]})
+                                          'ambience_rating': tup[6],
+                                          'streetAddress': tup[7],
+                                          'city': tup[8],
+                                          'zipcode': tup[9]})
 
 
     def to_dataframe(self, filename):
@@ -85,6 +88,9 @@ class ExtractData(object):
                            'food_rating',
                            'service_rating',
                            'ambience_rating',
+                           'streetAddress',
+                           'city',
+                           'zipcode',
                            'rest_name']
 
             df_list.append(df3)
@@ -125,13 +131,33 @@ class ExtractData(object):
         service_rating = [detailed_ratings[3*i + 1] for i in xrange(n)]
         ambience_rating = [detailed_ratings[3*i + 2] for i  in xrange(n)]
 
+        # Address
+        listings = soup.find_all('div', {'itemprop': 'streetAddress'})
+        address = [self.address(x.text.strip()) for x in listings][0]
+        streetAddress = address[0]
+        city = address[1]
+        zipcode = address[2]
+        
         return [t for t in itertools.izip(review_titles,
                                           review_lengths,
                                           reviews,
                                           ratings,
                                           food_rating,
                                           service_rating,
-                                          ambience_rating)]
+                                          ambience_rating,
+                                          streetAddress,
+                                          city,
+                                          zipcode)]
+
+    def address(self, address):
+        pattern = r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\d\d\d\d\d)'
+        pattern = re.compile(pattern)
+        m = pattern.search(address)
+        if m:
+            # street address, city with state, zipcode
+            return (m.group(1), m.group(2), m.group(3))
+        else:
+            return ('', '', '')
 
 
 def main1():

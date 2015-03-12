@@ -143,9 +143,10 @@ class TopicExtraction(object):
         
         if top_filename:
             with open(top_filename, 'w') as f:
-                f.write('n_gram: %d, %d' % (ngram_range[0], ngram_range[1]))
+                f.write('n_gram: %d, %d' % (self.ngram_range[0], 
+                        self.ngram_range[1]))
                 f.write('\n')
-                f.write('n_topics: %d' % n_topics)
+                f.write('n_topics: %d' % self.n_topics)
                 f.write('\n')
                 f.write('-------------------------')
                 f.write('\n')

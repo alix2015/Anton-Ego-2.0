@@ -1,15 +1,21 @@
 from flask import Flask, request, render_template
+import numpy as np
+import pandas as pd
+from itertools import izip
 # from pymongo import MongoClient
 
 # client = MongoClient()
 # coll = client.opentable.clean2
 
-PORT = 8888
+df = pd.read_pickle('../data/df_clean2.pkl')
 
+rest_names = df['rest_name'].unique()
+rid = df['rid'].unique()
+restos = [t for t in izip(rid, rest_names)]
+
+PORT = 8888
 app = Flask(__name__)
 
-# client = MongoDB()
-# coll = client.opentable.clean
 
 # OUR HOME PAGE
 #============================================
@@ -22,7 +28,8 @@ def home():
 #============================================
 @app.route('/submit_page')
 def submission_page():
-    return render_template('submit2.html')
+    return render_template('submit2.html',
+                           restos=restos)
 
 # RESULT PAGE
 #============================================
@@ -30,7 +37,8 @@ def submission_page():
 def predict_page():
     # get data from request form, the key is the name you set in your form
     # TODO: 'Sorry, the Critic has not yet visited this restaurant'
-    rest_name = request.form['user_input']
+    rid = request.form['user_choice']
+    print rid
     # cursor = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
     # rest_link = cursor['url']
     # cursor = coll.find({'rest_name': rest_name}, {'reviews': 1, '_id': 0})
@@ -42,12 +50,15 @@ def predict_page():
     topC = 'wine'
     topD = 'location'
     topE = 'date'
-    rest_link = 'http://www.opentable.com/lardoise'
-    rating = 4.0
-    rating_food = 4.5
-    rating_service = 3.2
-    rating_ambience = 4.1
+    mask = df['rid'] == rid
+    rest_name = df[mask]['rest_name'].values[0]
+    rest_link = df[mask]['url'].values[0]
+    rating = '%.2f' % df[mask]['rating'].mean()
+    rating_food = '%.2f' %  df[mask]['food_rating'].mean()
+    rating_service = '%.2f' %  df[mask]['service_rating'].mean()
+    rating_ambience = '%.2f' % df[mask]['ambience_rating'].mean()
     return render_template('result2a.html', rest_name=rest_name,
+                           rest_names=rest_names, restos=restos,
                            rest_link=rest_link, topA=topA, topB=topB, topC=topC,
                            topD=topD, topE=topE, rating=rating,
                            rating_food=rating_food, rating_service=rating_service,
