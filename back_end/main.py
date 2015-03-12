@@ -327,10 +327,12 @@ def main6():
             for dic in cursor:
                 reviews.append(dic['review'])
             f.write('%d reviews for %s' % (len(reviews), resto))
+            f.write('\n')
 
             # Restricting to longer reviews
             lg_reviews = [review for review in reviews if len(review) > 100]
-            f.write('%d long reviews for %s' % (len(lg_reviews), resto)) 
+            f.write('%d long reviews for %s' % (len(lg_reviews), resto))
+            f.write('\n') 
 
             # Restricting to categories
             for category in categories:
@@ -347,17 +349,24 @@ def main6():
 
                 toc =timeit.default_timer()
                 f.write('Summary for %s:' % category)
+                f.write('\n')
                 f.write('All %d reviews in %.3f + %.3f seconds' %
                         (len(sentences), tac - tic, toc - tac))
+                f.write('\n')
                 f.write('Positive')
+                f.write('\n')
                 for i in xrange(len(sentiments[0])):
                     f.write(str(sentiments[0][i]))
+                    f.write('\n')
                 f.write('Negative')
+                f.write('\n')
                 for i in xrange(len(sentiments[1])):
                     f.write(str(sentiments[1][i]))
+                    f.write('\n')
                 f.write('Subjective')
                 for i in xrange(len(sentiments[2])):
                     f.write(str(sentiments[2][i]))
+                    f.write('\n')
 
                 tic = timeit.default_timer()
                 sentences = te.extract_onecat_sentences(lg_reviews, category,
@@ -366,24 +375,34 @@ def main6():
                 if sentences:
                     f.write('%d sentences relevant for category %s' %
                             (len(sentences), category))
+                    f.write('\n')
                     sentiments = sentiment_texts(sentences)
                 else:
                     f.write('No corresponding sentence.')
+                    f.write('\n')
                 toc = timeit.default_timer()
                 f.write('Summary for %s:' % category)
+                f.write('\n')
                 f.write('%d long reviews in %.3f + %.3f seconds' %
                         (len(sentences), tac - tic, toc - tac))
+                f.write('\n')
                 f.write('Positive')
+                f.write('\n')
                 for i in xrange(len(sentiments[0])):
                     f.write(str(sentiments[0][i]))
                 f.write('Negative')
+                f.write('\n')
                 for i in xrange(len(sentiments[1])):
                     f.write(str(sentiments[1][i]))
+                    f.write('\n')
                 f.write('Subjective')
+                f.write('\n')
                 for i in xrange(len(sentiments[2])):
                     f.write(str(sentiments[2][i]))
+                    f.write('\n')
         big_toc = timeit.default_timer()
         f.write('Total duration %.3f' % (big_toc - big_tic))
+        f.write('\n')
     f.close()
 
    
