@@ -49,9 +49,10 @@ class ExtractData(object):
                                           'food_rating': tup[4],
                                           'service_rating': tup[5],
                                           'ambience_rating': tup[6],
-                                          'streetAddress': tup[7],
-                                          'city': tup[8],
-                                          'zipcode': tup[9]})
+                                          'address': tup[7]})
+                                          # 'streetAddress': tup[7],
+                                          # 'city': tup[8],
+                                          # 'zipcode': tup[9]})
 
 
     def to_dataframe(self, filename):
@@ -133,10 +134,11 @@ class ExtractData(object):
 
         # Address
         listings = soup.find_all('div', {'itemprop': 'streetAddress'})
-        address = [self.address(x.text.strip()) for x in listings][0]
-        streetAddress = address[0]
-        city = address[1]
-        zipcode = address[2]
+        address = [x.text.strip() for x in listings]
+        # address = [self.address(x.text.strip()) for x in listings][0]
+        # streetAddress = address[0]
+        # city = address[1]
+        # zipcode = address[2]
         
         return [t for t in itertools.izip(review_titles,
                                           review_lengths,
@@ -145,9 +147,7 @@ class ExtractData(object):
                                           food_rating,
                                           service_rating,
                                           ambience_rating,
-                                          streetAddress,
-                                          city,
-                                          zipcode)]
+                                          address)]
 
     def address(self, address):
         pattern = r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\d\d\d\d\d)'
@@ -155,9 +155,9 @@ class ExtractData(object):
         m = pattern.search(address)
         if m:
             # street address, city with state, zipcode
-            return (m.group(1), m.group(2), m.group(3))
+            return m.group(1), m.group(2), m.group(3)
         else:
-            return ('', '', '')
+            return '', '', ''
 
 
 def main1():
