@@ -3,8 +3,9 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import re
-import itertools
+from itertools import izip
 import timeit
+import random
 
 
 class ExtractData(object):
@@ -50,10 +51,6 @@ class ExtractData(object):
                                           'service_rating': tup[5],
                                           'ambience_rating': tup[6],
                                           'address': tup[7]})
-                                          # 'streetAddress': tup[7],
-                                          # 'city': tup[8],
-                                          # 'zipcode': tup[9]})
-
 
     def to_dataframe(self, filename):
         '''
@@ -89,10 +86,7 @@ class ExtractData(object):
                            'food_rating',
                            'service_rating',
                            'ambience_rating',
-                           'streetAddress',
-                           'city',
-                           'zipcode',
-                           'rest_name']
+                           'address']
 
             df_list.append(df3)
 
@@ -135,10 +129,6 @@ class ExtractData(object):
         # Address
         listings = soup.find_all('div', {'itemprop': 'streetAddress'})
         address = [x.text.strip() for x in listings]
-        # address = [self.address(x.text.strip()) for x in listings][0]
-        # streetAddress = address[0]
-        # city = address[1]
-        # zipcode = address[2]
         
         return [t for t in itertools.izip(review_titles,
                                           review_lengths,
@@ -149,16 +139,22 @@ class ExtractData(object):
                                           ambience_rating,
                                           address)]
 
-    def address(self, address):
-        pattern = r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\d\d\d\d\d)'
-        pattern = re.compile(pattern)
-        m = pattern.search(address)
-        if m:
-            # street address, city with state, zipcode
-            return m.group(1), m.group(2), m.group(3)
-        else:
-            return '', '', ''
 
+def parse_address(address):
+    '''
+    INPUT: string
+    OUTPUT: 3-tuple of strings
+
+    This function parses most address in the USA and Canada
+    '''
+    pattern = r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\w\w\w\s*\w\w+)'
+    pattern = re.compile(pattern)
+    m = pattern.search(address)
+    if m:
+        # street address, city with state, zipcode
+        return m.group(1), m.group(2), m.group(3)
+    else:
+        return '', '', ''
 
 def main1():
     filename = '../data/reviews_SF.pkl'
@@ -177,6 +173,38 @@ def main2():
     toc = timeit.default_timer()
     print 'Extraction finished in %.3f seconds.' % (toc - tic)
 
+def main3():
+    '''
+    Sampling restaurants in San Francisco, CA for the front end
+    '''
+    client = MongoClient()
+    coll = client.opentable.clean2a
+
+    address = coll.distinct('address')
+    parsed_address = [parse_address(a) for a in address]
+    sf_mask = [t[1] == 'San Francisco, CA' for t in parsed_address]
+    sf_address = [t[0] for t in izip(address, sf_mask) if t[1]]
+
+    sf_rest = []
+    for a in sf_address:
+        cursor = coll.find({'address': a}, {'rest_name': 1})
+        sf_rest.append(cursor.next()['rest_name'])
+
+    print len(sf_rest)
+
+    # SF restaurants
+    cursor = coll.find({'rest_name': {'$in': sf_rest}})
+    df = pd.DataFrame(list(cursor))
+    print df.shape
+    df.to_pickle('../../front_end/data/df_clean2a.pkl')
+
+    # Sampling 20 restaurants
+    # sample = random.sample(sf_rest, 20)
+    # cursor = coll.find({'rest_name': {'$in': sample}})
+    # df = pd.DataFrame(list(cursor))
+    # print df.shape
+    # df.to_pickle('../../front_end/data/df_clean2a_sample.pkl')
+
 
 if __name__ == '__main__':
-    main2()
+    main3()

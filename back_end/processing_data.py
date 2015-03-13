@@ -5,6 +5,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.tag import pos_tag
 from nltk.corpus import stopwords
+from categories import Categories
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 # from sklearn.cluster import KMeans
@@ -27,7 +28,7 @@ class TopicExtraction(object):
                  ngram_range=(1, 1),
                  max_words=None,
                  max_iter=200,
-                 category=None,
+                 categories=None,
                  verbose=False):
         '''
         INPUT: TopicExtraction object, <list of strings, integer, boolean,
@@ -53,7 +54,7 @@ class TopicExtraction(object):
                               max_iter=self.max_iter)
         self.trained = False
         self.H_ = None
-        self.category = category
+        self.categories = categories
         self.fonts_ = '/Library/Fonts/Georgia.ttf'
         self.wordcloud = WordCloud(font_path=self.fonts_)
         
@@ -78,6 +79,28 @@ class TopicExtraction(object):
                                          gaps=True).tokenize(rest_names)
             for name in rest_names:
                 self.stopwords.append(name)
+            # Adding positive adjectives/verbs that dominate reviews
+            self.stopwords.append('good')
+            self.stopwords.append('excellent')
+            self.stopwords.append('great')
+            self.stopwords.append('friendly')
+            self.stopwords.append('nice')
+            self.stopwords.append('decent')
+            self.stopwords.append('say')
+            self.stopwords.append('recommend')
+            self.stopwords.append('like')
+            self.stopwords.append('love')
+            self.stopwords.append('recommended')
+            self.stopwords.append('liked')
+            self.stopwords.append('loved')
+            self.stopwords.append('dining')
+            # Adding genering words
+            self.stopwords.append('restaurant')
+            self.stopwords.append('restaurants')
+            self.stopwords.append('food')
+            self.stopwords.append('ambience')
+            self.stopwords.append('service')
+            self.stopwords.append('dining')
             self.rest_names = None # TO AVOID REPROCESSING
             self.stopwords = set(self.stopwords)
             if self.verbose:
@@ -177,30 +200,31 @@ class TopicExtraction(object):
         plt.savefig(filename)
         plt.close()
         
-    def _define_categories(self, dic):
+    def _define_categories(self, categories):
         '''
         INPUT: TopicExtraction object, dictionary
         OUTPUT: None
 
-        Updates the category attribute of the TopicExtraction object,
+        Updates the categories attribute of the TopicExtraction object,
         with a dictionary the keys of which are the latent topic name
         and the value is a set of the indices of the corresponding latent
         topic components in the factorization.
         So far, hand-labelling of the latent topics
         Possible improvement: using an ontology
         '''
-        self.category = dic
+        self.categories = categories
         # print 'Categories created'
 
     def extract_onecat_topwords(self,
                                 texts,
                                 category,
                                 filename,
-                                top_n=15,
-                                dic=None):
+                                base='',
+                                top_n=5,
+                                cat=None):
         '''
         INPUT: TopicExtraction object, list of strings, string, 
-               string, integer, <dictionary>
+               string, integer, <categories>
         OUTPUT: list of strings
 
         This method transforms a test set using the trained model
@@ -210,9 +234,9 @@ class TopicExtraction(object):
         It exports these words as a word cloud in filename and returns them.
         '''
 
-        if not self.category:
-            if dic:
-                self._define_categories(dic)
+        if not self.categories:
+            if cat:
+                self._define_categories(cat)
             else:
                 print 'Please provide a dictionary to initialize the categories'
                 return
@@ -224,22 +248,23 @@ class TopicExtraction(object):
         W = self.factorizor.transform(V)
 
         top_words = []
-        for topic in self.category[category]:
+        for topic in self.categories.get(category):
             top_doc_idx = np.argsort(W[:, topic])[-1:-(top_n + 1):-1]
             temp = [self.my_tokenize(texts[idx]) for idx in top_doc_idx]
-            temp = [item for sublist in temp for item in sublist]
+            temp = [item for sublist in temp for item in sublist
+                    if item not in self.stopwords]
             
             for item in temp:
                 top_words.append(item)
         
-        self.cloud_fig(top_words, '../../data/%s.png' % filename)
+        self.cloud_fig(top_words, '%s.png' % filename)
         return top_words
 
 
-    def extract_onecat_sentences(self, texts, category, dic=None, token=True):
+    def extract_onecat_sentences(self, texts, category, cat=None, token=True):
         '''
         INPUT: TopicExtraction object, list of strings, string, 
-        <dictionary, boolean>
+        <categories, boolean>
         OUTPUT: list of list of strings
 
         This method extracts from a test set of documents the sentences
@@ -248,9 +273,9 @@ class TopicExtraction(object):
         should be provided. If token, sentences are tokenized, otherwise
         they are returned as are.
         '''
-        if not self.category:
-            if dic:
-                self._define_categories(dic)
+        if not self.categories:
+            if cat:
+                self._define_categories(cat)
             else:
                 print 'Please provide a dictionary to initialize the categories'
                 return
@@ -260,8 +285,8 @@ class TopicExtraction(object):
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-        for topic in self.category[category]:
-            idx = np.argsort(W[:, topic])[-1:-16:-1]
+        for topic in self.categories.get(category):
+            idx = np.argsort(W[:, topic])[-1:-6:-1]
             if token:
                 docs = [self.my_tokenize(texts[i]) for i in idx]
             else:
@@ -269,11 +294,11 @@ class TopicExtraction(object):
 
         return docs
 
-    def top_categories(self, texts, top_n=5, dic=None):
+    def top_categories(self, texts, top_n=5, cat=None):
 
-        if not self.category:
-            if dic:
-                self._define_categories(dic)
+        if not self.categories:
+            if cat:
+                self._define_categories(cat)
             else:
                 print 'Please provide a dictionary to initialize the categories'
                 return
@@ -287,12 +312,12 @@ class TopicExtraction(object):
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-        max_coef = np.zeros(len(self.category))
+        max_coef = np.zeros(len(self.categories))
         idx = 0
         names = []
-        for category in self.category:
+        for category in self.categories:
             names.append(category)
-            for topic in self.category[category]:
+            for topic in self.categories.get(category):
                 m = max(W[:, topic])
                 if m > max_coef[idx]:
                     max_coef[idx] = m

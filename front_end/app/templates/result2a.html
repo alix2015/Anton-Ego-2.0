@@ -75,40 +75,34 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Categories <span class="sr-only">(current)</span></a></li>
+            <!-- <li class="active"><a href="#">Categories <span class="sr-only">(current)</span></a></li> -->
             <li><a data-toggle="collapse" data-target="#food">Food</a></li>
             <li><a data-toggle="collapse" data-target="#service">Service</a></li>
             <li><a data-toggle="collapse" data-target="#ambience">Ambience</a>
             </li>
           </ul>
           <ul class="nav nav-sidebar">
-            <li><a data-toggle="collapse" data-target="#{{topA}}">{{topA}}</a>
+            {% for cat in top%}
+            <li><a data-toggle="collapse" data-target="#{{cat}}">{{cat}}</a>
             </li>
-            <li><a data-toggle="collapse" data-target="#{{topB}}">{{topB}}</a>
-            </li>
-            <li><a data-toggle="collapse" data-target="#{{topC}}">{{topC}}</a>
-            </li>
-            <li><a data-toggle="collapse" data-target="#{{topD}}">{{topD}}</a>
-            </li>
-            <li><a data-toggle="collapse" data-target="#{{topE}}">{{topE}}</a>
-            </li>
+            {% endfor %}
           </ul>
         </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-12 col-md-offset-2 main">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           {% block content%}
           <h1 class="page-header">{{rest_name}}: {{rating}}</h1>
 
           <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="../static/img/test_experience.png" class="img-responsive" alt="Wordcloud of food">
+            <div class="col-xs-6 col-sm-3 col-md-4 placeholder">
+              <img src={{cloud_food}} class="img-responsive" alt="Wordcloud of food">
               <h4>Food</h4>
               <span class="text-muted">Rating: {{rating_food}}</span>
               <p><a class="btn btn-outline btn-lg" data-toggle="collapse" 
                 data-target="#food">
                 View details »</a>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="../static/img/test_wine.png" class="img-responsive" 
+            <div class="col-xs-6 col-sm-3 col-md-4 placeholder">
+              <img src={{cloud_service}} class="img-responsive" 
               alt="Wordcloud of service">
               <h4>Service</h4>
               <span class="text-muted">Rating: {{rating_service}}</span>
@@ -117,8 +111,8 @@
                 View details »
               </a>
             </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="../static/img/test_wine.png" class="img-responsive" 
+            <div class="col-xs-6 col-sm-3 col-md-4 placeholder">
+              <img src={{cloud_ambience}} class="img-responsive" 
               alt="Wordcloud of ambience">
               <h4>Ambience</h4>
               <span class="text-muted">Rating: {{rating_ambience}}</span>
@@ -129,44 +123,32 @@
             </div>
           </div>
 
-          
-          <div id="food" class="collapse">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat.
-          </div>
+          <div class="row placeholders">
+            <div id="food" class="collapse">
+              {% for sent in sentences['food']%}
+              [...] {{sent}} [...] <br/>
+              {% endfor %}
+            </div>
 
-          <div id="service" class="collapse">
-            Carthago delenda.
-          </div>
+            <div id="service" class="collapse">
+              {% for sent in sentences['service']%}
+              [...] {{sent}} [...] <br/>
+              {% endfor %}
+            </div>
 
-          <div id="ambience" class="collapse">
-            Ilum absens absentem auditque videtque
-          </div>
+            <div id="ambience" class="collapse">
+              {% for sent in sentences['ambience']%}
+              [...] {{sent}} [...] <br/>
+              {% endfor %}
+            </div>
 
-          <div id={{topA}} class="collapse">
-            Alea jacta
-          </div>
-
-          <div id={{topB}} class="collapse">
-            Animale triste
-          </div>
-
-          <div id={{topC}} class="collapse">
-            De rerum natura
-          </div>
-
-          <div id={{topC}} class="collapse">
-            Tusculanae
-          </div>
-
-          <div id={{topD}} class="collapse">
-            Principia mathematica
-          </div>
-
-          <div id={{topE}} class="collapse">
-            De bello gallico
+            {% for cat in top%}
+            <div id={{cat}} class="collapse">
+              {% for sent in sentences[cat]%}
+              [...] {{sent}} [...] <br/>
+              {% endfor %}
+            </div>
+            {% endfor %}
           </div>
 
           <!-- <h2 class="sub-header">Section title</h2>

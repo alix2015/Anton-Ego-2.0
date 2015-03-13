@@ -13,10 +13,10 @@ a:hover {
 .btn-default,
 .btn-default:hover,
 .btn-default:focus {
-  color: #330099;/*#993333;*//*#333;*/
+  color: #fff;/*#871414;*//*#3c1414;*//*#993333;*//*##330099;#333*/
   text-shadow: none; /* Prevent inheritence from `body` */
-  background-color: #fff;
-  border: 1px solid #fff;
+  background-color: #071607;/*#2c1608;*/
+  border: 1px solid #000;
 }
 
 
@@ -27,16 +27,16 @@ a:hover {
 html,
 body {
   height: 100%;
-  background-color: #330099;/*#993333;*//*#333;*/
+  background-color: #333;/*#993333;*//*#330099*/
   position: relative;
-  background: url(../img/portrait.jpg) scroll 0px 100% / cover transparent; no-repeat center center fixed; 
+  background: url(../img/SFrestaurant.jpg) scroll 0px 100% / cover transparent; no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
 body {
-  color: #fff;
+  color: #071607;/*#321414;*//*#143c3c;*//*#b31b1b;*//*#100c08;*//*#004040;*//*#778899;*//*#bc987e;*//*#fff;*/
   text-align: center;
   text-shadow: 0 1px 3px rgba(0,0,0,.5);
 }
@@ -84,8 +84,8 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #fff; /* IE8 proofing */
-  color: rgba(255,255,255,.75);
+  color: #495661; /* IE8 proofing */
+  /*color: rgba(255,255,255,.75);*/
   border-bottom: 2px solid transparent;
 }
 .masthead-nav > li > a:hover,
@@ -97,8 +97,8 @@ body {
 .masthead-nav > .active > a,
 .masthead-nav > .active > a:hover,
 .masthead-nav > .active > a:focus {
-  color: #fff;
-  border-bottom-color: #fff;
+  color: #333c44;
+  border-bottom-color: #333c44;
 }
 
 @media (min-width: 768px) {

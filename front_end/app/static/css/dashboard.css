@@ -2,9 +2,11 @@
  * Base structure
  */
 
+
 /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
+  font-color: #440a0a;
 }
 
 
@@ -23,9 +25,10 @@ body {
  */
 .navbar-fixed-top {
   border: 0;
-  background-color: #330099;
+  background-color: #440a0a;/*#333;*//*#330099;*/
   color: #fff;
 }
+
 
 /*
  * Sidebar
@@ -60,14 +63,15 @@ body {
 .nav-sidebar > li > a {
   padding-right: 20px;
   padding-left: 20px;
+  color: #440a0a;
 }
 .nav-sidebar > .active > a {
-  font-color: #330099;
+  font-color: #fff;/*#330099;*/
 }
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
   color: #fff;
-  background-color: #330099;/*#428bca;*/
+  background-color: #440a0a;/*#330099;*/
 }
 
 
@@ -86,6 +90,7 @@ body {
 }
 .main .page-header {
   margin-top: 0;
+  color: #440a0a;
 }
 
 /*
@@ -113,4 +118,8 @@ body {
 .placeholder img {
   display: inline-block;
   border-radius: 50%;
+}
+
+.btn-lg{
+  color: #440a0a;
 }
