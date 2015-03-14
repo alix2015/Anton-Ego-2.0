@@ -102,7 +102,9 @@ class ExtractData(object):
     def data(self, raw):
         '''
         INPUT: raw html
-        OUTPUT: list of parameters extracted from html
+        OUTPUT: list of strings
+
+        This methods outputs parameters extracted from html
         '''
         soup = BeautifulSoup(raw, 'html.parser')
         # Body of the reviews
@@ -156,25 +158,26 @@ def parse_address(address):
     else:
         return '', '', ''
 
-def main1():
-    filename = '../data/reviews_SF.pkl'
-    ed = ExtractData()
-    df = ed.to_dataframe(filename)
 
-    print df.shape
-    print 'Info:'
-    print df.info()
+def processing_tomongo():
+    '''
+    INPUT: None
+    OUTPUT: None
 
-
-def main2():
+    Process raw html data dumped into a Mongo DB during scraping
+    into another Mongo DB of cleaned data
+    '''
     extractor = ExtractData()
     tic = timeit.default_timer()
     extractor.to_mongo()
     toc = timeit.default_timer()
     print 'Extraction finished in %.3f seconds.' % (toc - tic)
 
-def main3():
+def sampling_SF():
     '''
+    INPUT: None
+    OUTPUT: None
+
     Sampling restaurants in San Francisco, CA for the front end
     '''
     client = MongoClient()
@@ -198,13 +201,7 @@ def main3():
     print df.shape
     df.to_pickle('../../front_end/data/df_clean2a.pkl')
 
-    # Sampling 20 restaurants
-    # sample = random.sample(sf_rest, 20)
-    # cursor = coll.find({'rest_name': {'$in': sample}})
-    # df = pd.DataFrame(list(cursor))
-    # print df.shape
-    # df.to_pickle('../../front_end/data/df_clean2a_sample.pkl')
-
 
 if __name__ == '__main__':
-    main3()
+    processing_tomongo()
+    sampling_SF()

@@ -63,6 +63,13 @@ class Categories(object):
         f.close()
 
     def get(self, category):
+        '''
+        INPUT: Categories object, string
+        OUTPUT: set of integers
+
+        This method returns the index of the latent features composing
+        category.
+        '''
         return self.dic.get(category, {})
 
 

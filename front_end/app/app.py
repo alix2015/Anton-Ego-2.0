@@ -5,22 +5,15 @@ from itertools import izip
 import sys
 sys.path.insert(0, '../../back_end/')
 from main_df import build_results
-# import imp
-# from pymongo import MongoClient
 
-# client = MongoClient()
-# coll = client.opentable.clean2
-
-df = pd.read_pickle('../data/df_clean2a.pkl')
 base = '../data/'
 base_fig = 'static/img/'
 
+df = pd.read_pickle(base + 'df_clean2a.pkl')
 rest_names = df['rest_name'].unique()
 rid = df['rid'].unique()
 restos = [t for t in izip(rid, rest_names)]
-
-
-# modl = imp.load_source('main_df', '../../back_end/main_df.py')
+restos.sort(key=lambda t: t[1])
 
 PORT = 8888
 app = Flask(__name__)
@@ -44,14 +37,9 @@ def submission_page():
 #============================================
 @app.route('/topic', methods=['POST', 'GET'])
 def predict_page():
-    # get data from request form, the key is the name you set in your form
+    # get data from request form, the key is the restaurant id
     rid = request.form['user_choice']
     
-    # topA = 'steak'
-    # topB = 'birthday'
-    # topC = 'wine'
-    # topD = 'location'
-    # topE = 'date'
     mask = df['rid'] == rid
     rest_name = df[mask]['rest_name'].values[0]
     rest_link = df[mask]['url'].values[0]
@@ -74,8 +62,8 @@ def predict_page():
                            rest_names=rest_names, restos=restos,
                            rest_link=rest_link, top=top,
                            rating=rating, sentiments=sentiments,
-                           sentences=sentences,
-                           rating_food=rating_food, rating_service=rating_service,
+                           sentences=sentences, rating_food=rating_food,
+                           rating_service=rating_service,
                            rating_ambience=rating_ambience,
                            cloud_food=cloud_food, cloud_service=cloud_service,
                            cloud_ambience=cloud_ambience, clouds=clouds)

@@ -2,34 +2,20 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt 
 from nltk.tokenize import RegexpTokenizer
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.tag import pos_tag
+from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 from categories import Categories
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
-# from sklearn.cluster import KMeans
 from wordcloud import WordCloud
-from sentiment_analysis import AvgSentimentAnalysis
-# from sklearn.metrics import precision_score, recall_score, accuracy_score
-# from sklearn.pipeline import Pipeline
-# import cPickle as pickle
 import dill
 import timeit
 
 
-
-
 class TopicExtraction(object):
-    def __init__(self,
-                 rest_names=[],
-                 n_topics=6,
-                 sentence=False,
-                 ngram_range=(1, 1),
-                 max_words=None,
-                 max_iter=200,
-                 categories=None,
-                 verbose=False):
+    def __init__(self, rest_names=[], n_topics=6, sentence=False,
+                 ngram_range=(1, 1), max_words=None, max_iter=200,
+                 categories=None, verbose=False):
         '''
         INPUT: TopicExtraction object, <list of strings, integer, boolean,
         tuple of integers, integer, integer>
@@ -139,10 +125,7 @@ class TopicExtraction(object):
         
         return W
 
-    def extract_top_words(self,
-                          texts,
-                          top_n=10,
-                          top_filename=None,
+    def extract_top_words(self, texts, top_n=10, top_filename=None,
                           wordcloud=False):
         '''
         INPUT: list of strings, integer <string, boolean>
@@ -215,21 +198,15 @@ class TopicExtraction(object):
         self.categories = categories
         # print 'Categories created'
 
-    def extract_onecat_topwords(self,
-                                texts,
-                                category,
-                                cloud=False,
-                                filename,
-                                base='',
-                                top_n=5,
-                                cat=None):
+    def extract_onecat_topwords(self, texts, category, filename=False,
+                                base='', top_n=5, cat=None):
         '''
-        INPUT: TopicExtraction object, list of strings, string, 
-               string, integer, <categories>
+        INPUT: TopicExtraction object, list of strings, string, [string,
+               string, integer, categories]
         OUTPUT: list of strings
 
         This method transforms a test set using the trained model
-        to extract the top words in the latent topics corresponding
+        to extract top words in the latent topics corresponding
         to one category. In case the category attribute of the TopicExtraction
         object has not yet been initialized, a dictionary should be provided.
         It exports these words as a word cloud in filename and returns them.
@@ -258,7 +235,8 @@ class TopicExtraction(object):
             for item in temp:
                 top_words.append(item)
         
-        self.cloud_fig(top_words, '%s.png' % filename)
+        if filename:
+            self.cloud_fig(top_words, '%s.png' % filename)
         return top_words
 
 
@@ -296,6 +274,12 @@ class TopicExtraction(object):
         return docs
 
     def top_categories(self, texts, top_n=5, cat=None):
+        '''
+        INPUT: TopicExtraction object, list of strings, [integer, boolean]
+        OUTPUT: list of strings
+
+        This method returns the top categories of a list of texts.
+        '''
 
         if not self.categories:
             if cat:
@@ -305,7 +289,7 @@ class TopicExtraction(object):
                 return
 
         # What are the most relevant categories?
-        # The ones that yield the highest largest projections on
+        # The ones that yield the largest projections on
         # the category subspace
         
         texts = [sent for item in [sent_tokenize(text) for text in texts]\
@@ -326,7 +310,3 @@ class TopicExtraction(object):
 
         names = np.array(names)
         return names[np.argsort(max_coef)[-1:-(top_n+1):-1]]
-
-
-
-

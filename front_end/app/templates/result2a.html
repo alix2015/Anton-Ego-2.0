@@ -163,9 +163,9 @@
               <tbody>
                 {% for tup in sentiments['food']%}
                 <tr>
-                  <td>{{tup[0][0]}} - {{tup[0][1]}}</td>
-                  <td>{{tup[1][0]}} - {{tup[1][1]}}</td>
-                  <td>{{tup[2][0]}} - {{tup[2][1]}}</td>
+                  <td>{{'%.2f' % tup[0][0]}} - {{tup[0][1]}}</td>
+                  <td>{{'%.2f' % tup[1][0]}} - {{tup[1][1]}}</td>
+                  <td>{{'%.2f' % tup[2][0]}} - {{tup[2][1]}}</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -184,9 +184,9 @@
               <tbody>
                 {% for tup in sentiments['service']%}
                 <tr>
-                  <td>{{tup[0][0]}} - {{tup[0][1]}}</td>
-                  <td>{{tup[1][0]}} - {{tup[1][1]}}</td>
-                  <td>{{tup[2][0]}} - {{tup[2][1]}}</td>
+                  <td>{{'%.2f' % tup[0][0]}} - {{tup[0][1]}}</td>
+                  <td>{{'%.2f' % tup[1][0]}} - {{tup[1][1]}}</td>
+                  <td>{{'%.2f' % tup[2][0]}} - {{tup[2][1]}}</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -205,15 +205,16 @@
               <tbody>
                 {% for tup in sentiments['ambience']%}
                 <tr>
-                  <td>{{tup[0][0]}} - {{tup[0][1]}}</td>
-                  <td>{{tup[1][0]}} - {{tup[1][1]}}</td>
-                  <td>{{tup[2][0]}} - {{tup[2][1]}}</td>
+                  <td>{{'%.2f' % tup[0][0]}} - {{tup[0][1]}}</td>
+                  <td>{{'%.2f' % tup[1][0]}} - {{tup[1][1]}}</td>
+                  <td>{{'%.2f' % tup[2][0]}} - {{tup[2][1]}}</td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
 
+          {% for cat in top%}
           <div class="table-responsive collapse" id="{{cat}}">
             <table class="table table-striped">
               <thead>
@@ -226,14 +227,15 @@
               <tbody>
                 {% for tup in sentiments[cat]%}
                 <tr>
-                  <td>{{tup[0][0]}} - {{tup[0][1]}}</td>
-                  <td>{{tup[1][0]}} - {{tup[1][1]}}</td>
-                  <td>{{tup[2][0]}} - {{tup[2][1]}}</td>
+                  <td>{{'%.2f' % tup[0][0]}} - {{tup[0][1]}}</td>
+                  <td>{{'%.2f' % tup[1][0]}} - {{tup[1][1]}}</td>
+                  <td>{{'%.2f' % tup[2][0]}} - {{tup[2][1]}}</td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
+          {% endfor %}
           {% endblock %}
         </div>
       </div>

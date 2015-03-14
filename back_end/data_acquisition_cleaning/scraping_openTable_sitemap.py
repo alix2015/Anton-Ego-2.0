@@ -9,11 +9,17 @@ import time
 
 '''
 This file defines the functions necessary to scrape Open Table
-restaurant review pages. Not encapsulated in a class.
+restaurant review pages.
 '''
 
-# 22 such pages (index of all the restaurants split into 22 pages)
 def get_resto_links(n):
+    '''
+    INPUT: integer
+    OUTPUT: list of strings
+
+    Scrapes page n of Open Table index to obtain urls to the restaurant
+    page on the site.
+    '''
     req = 'http://www.opentable.com/opentable-sitemap.aspx?pt=100&page=%d' % n
     response = requests.get(req)
     if response.status_code != 200:
@@ -31,6 +37,13 @@ def get_resto_links(n):
 # Informations can be found in the span.ReviewsDataStore options
 
 def get_resto_data(url):
+    '''
+    INPUT: string
+    OUTPUT: 5-tuple of strings
+
+    Given a the index url of a restaurant, returns the profile url,
+    restaurant id, restaurant name, review count, and page count.
+    '''
     try:
         response = requests.get(url)
         if response.status_code != 200:
@@ -55,13 +68,16 @@ def get_resto_data(url):
         pb.insert({'url': url})
 
 
-def scrape_reviews(profile_url,
-                   rid,
-                   rest_name,
-                   review_cnt,
-                   page_cnt,
-                   collection,
-                   pb):
+def scrape_reviews(profile_url, rid, rest_name, review_cnt, page_cnt,
+                   collection, pb):
+    '''
+    INPUT: string, string, string, string, string, MongoClient collection,
+    MongoClient collection
+    OUTPUT: None
+
+    Scrapes raw html of review pages and store it in collection. Tracks
+    failed scraping in pb.
+    '''
     print 'Scraping %s' % rest_name
     
     if review_cnt:
@@ -91,30 +107,28 @@ if __name__ == '__main__':
     coll = db.review3
     pb = db.problem
 
-# url = 'http://www.opentable.com/rest_profile_reviews.aspx?rid=99991&tab=2'
-    # for i in xrange(1, 5):
-    #     'Obtaining restaurants links from page %d' % i
-    #     urls = get_resto_links(i)
-    #     time.sleep(0.1)
+    # 22 such pages (index of all the restaurants split into 22 pages)
+    # First three scraped in the following.
+    for i in xrange(1, 3):
+        'Obtaining restaurants links from page %d' % i
+        urls = get_resto_links(i)
+        time.sleep(0.1)
 
-    #     count = 0
-    #     for url in urls:
-    #         if not (count % 10):
-    #             print 'Scraped %d restaurants' % count
-    #         tup = get_resto_data(url)
-    #         profile_url, rid, rest_name, review_cnt, page_cnt = tup
+        count = 0
+        for url in urls:
+            if not (count % 10):
+                print 'Scraped %d restaurants' % count
+            tup = get_resto_data(url)
+            profile_url, rid, rest_name, review_cnt, page_cnt = tup
 
-    #         scrape_reviews(profile_url,
-    #                        rid,
-    #                        rest_name, 
-    #                        review_cnt, 
-    #                        page_cnt, 
-    #                        coll)
-    #         count += 1
-    #         time.sleep(1)
-    'Obtaining restaurants links from page %d' % 1
-    urls = get_resto_links(3)
-    time.sleep(0.1)
+            scrape_reviews(profile_url,
+                           rid,
+                           rest_name, 
+                           review_cnt, 
+                           page_cnt, 
+                           coll)
+            count += 1
+            time.sleep(1)
 
     count = 0
     for url in urls:

@@ -1,56 +1,35 @@
 import numpy as np 
 import pandas as pd 
-from pymongo import MongoClient
 from categories import Categories
-from nltk.tokenize import sent_tokenize
-from textblob import TextBlob
 from processing_data import TopicExtraction
-# from sentiment_analysis import SentimentWords, AvgSentimentAnalysis
 from sentiment_analysis import BlobSentimentAnalysis
 import dill
 import timeit
-from collections import defaultdict
-import random
 
 
 # Utilities for a pipeline based on dataframes
 
-# No longer useful: single pkl file
-# def build_data(filenames, min_rev_len=0):
-#     df_list = []
-#     for file in filenames:
-#         df_list.append(pd.read_pickle(file))
-
-#     df = pd.concat(df_list)
-#     df = df.drop_duplicates('reviews')
-
-#     df = df[df['review_lengths'] > min_rev_len]
-
-#     return df
-
-def build_model(df,
-                n_topics,
-                ngram_range,
-                max_words,
-                max_iter,
-                model_filename,
+def build_model(df, n_topics, ngram_range, max_words, max_iter, model_filename,
                 top_filename=None):
+    '''
+    INPUT: pandas dataframe, integer, integer 2-tuple, integer, integer, string
+    [string]
+    OUTPUT: TopicExtraction object
+
+    This functions uses the data in df to initialize a TopicExtraction
+    '''
     
     rest_names = df['rest_name'].dropna().unique().tolist()
     print 'Number of restaurants: %d' % len(rest_names)
-    te = TopicExtraction(rest_names=rest_names,
-                         n_topics=n_topics,
-                         sentence=True,
-                         ngram_range=ngram_range,
-                         max_words=max_words,
+    te = TopicExtraction(rest_names=rest_names, n_topics=n_topics, sentence=True,
+                         ngram_range=ngram_range, max_words=max_words,
                          max_iter=max_iter)
 
 
     if top_filename:
-        top_words = te.extract_top_words(df['review'],
-                                         top_n=15,
+        top_words = te.extract_top_words(df['review'], top_n=15,
                                          top_filename=top_filename)
-                                         # wordcloud=True)
+
     else:
         te.fit_transform(df['reviews'])
 
@@ -60,41 +39,18 @@ def build_model(df,
             print 'Finished pickling the model'
     return te
 
-# def main1():
-#     data_SF = '../../data/reviews_SF.pkl'
-#     data_1 = '../../data/reviews_1.pkl'
-#     data_2 = '../../data/reviews_2.pkl'
 
-#     df =  build_data([data_SF, data_1, data_2], min_rev_len=100)
-#     print df.shape
+def model_initializing(data_file, model_file, verbose=True):
+    '''
+    INPUT: string, string, [string, boolean]
+    OUTPUT: None
 
-#     df.to_pickle('../front_end/data/df.pkl')
-
-#     print 'Number of distinct restaurants %d' % (len(df['rest_name'].unique()))
-
-# Random sampling not user-friendly
-# def main2():
-#     # Using 20 restaurants
-#     client = MongoClient()
-#     coll = client.opentable.clean2
-#     # Fetching the 3500 / 3507 restaurant names that have reviews > 150 char
-#     cursor = coll.find({'review_length': {'$gt': 150}}, {'rest_name': 1, '_id': 0})
-#     rest_names = []
-#     for dic in cursor:
-#         rest_names.append(dic['rest_name'])
-#     # Sampling 20 of them
-#     sample = random.sample(set(rest_names), 20)
-#     cursor = coll.find({'rest_name': {'$in': sample}})
-#     df = pd.DataFrame(list(cursor))
-
-#     print df.columns
-#     print df.shape
-#     print 'Chosen restaurants'
-#     print df['rest_name'].unique()
-#     df.to_pickle('../front_end/data/df_clean2.pkl')
-
-def main3():
-    df = pd.read_pickle('../front_end/data/df_clean2a.pkl')
+    This function is called to initialize a TopicExtraction model
+    using the data loaded from data_file pickle file, outputting it
+    in model_filename out. The optional boolean input switches the verbosity.
+    '''
+    
+    df = pd.read_pickle(data_file)
     texts = df['review']
 
     n_topics = 100
@@ -105,20 +61,28 @@ def main3():
     top_filename = '../../data/te_2_20_%d_%dgram_max_%d_100_extraStopW.txt' % \
                     (n_topics, ngram_range[1], max_words)
 
-    model_filename = '../front_end/data/te_2a_extraSW.pkl'
-
     tic = timeit.default_timer()
-    te = build_model(df,
-                     n_topics,
-                     ngram_range,
-                     max_words,
-                     max_iter,
-                     model_filename,
-                     top_filename)
+    te = build_model(df, n_topics, ngram_range, max_words, max_iter,
+                     model_filename, top_filename)
     toc = timeit.default_timer()
-    print 'Building model in %3.f seconds' % (toc - tic)
+    if verbose:
+        print 'Building model in %3.f seconds' % (toc - tic)
 
-def build_results(rest_name, base, base_fig):
+
+def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
+    '''
+    INPUT: string, string, string, [boolean, boolean]
+    OUTPUT: dictionary, dictionary
+
+    This function uses an initialized TopicExtraction model
+    and a dataset to perform latent feature extraction and
+    sentiment analysis on this dataset. It returns a dictionary
+    of sentences inedxed by category and a dictionary of sentiment
+    output indexed by category.
+    The optional verbose boolean controls verbosity.
+    The optional export boolean controls whether sentence categorization
+    and sentiments are pickled.
+    '''
     # paths have to be written from the front_end/app/ viewpoint
     df = pd.read_pickle(base + 'df_clean2a.pkl')
     texts = df['review']
@@ -133,78 +97,97 @@ def build_results(rest_name, base, base_fig):
     texts = df[df['rest_name'] == rest_name]['review'].values
     rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
 
-    print 'Running top_cat...'
+    if verbose:
+        print 'Running top_cat...'
     tic = timeit.default_timer()
     top_cat = te.top_categories(texts, cat=categories)
     for c in special:
         if c not in top_cat:
             top_cat = np.append(top_cat, c)
-    print top_cat
+    if verbose:
+        print top_cat
     tac = timeit.default_timer()
-    print 'Finished top_cat in %.3f seconds' % (tac - tic)
+    if verbose:
+        print 'Finished top_cat in %.3f seconds' % (tac - tic)
 
     sentences = {}
     sentiments = {}
-    print 'Looping over categories...'
+    if verbose:
+        print 'Looping over categories...'
     tic = timeit.default_timer()
     for c in top_cat:
-        print c
-        cloud_name = '%s_%s' % (rid, c)
-        cloud_name = base_fig + cloud_name
-        print cloud_name
-        te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
+        if base_fig:
+            cloud_name = '%s_%s' % (rid, c)
+            cloud_name = base_fig + cloud_name
+            print cloud_name
+            te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
+        else:
+            te.extract_onecat_topwords(texts, c)
         sentences[c] = te.extract_onecat_sentences(texts, c, token=False)
         sentiments[c] = sent_analyzer.sentiment_sentences(sentences[c])
     tac = timeit.default_timer()
-    print 'End looping in %.3f seconds' % (tac - tic)
+    if verbose:
+        print 'End looping in %.3f seconds' % (tac - tic)
 
-    filename = '%s_snippets.pkl' % rid
-    filename = base + filename
-    tic = timeit.default_timer()
-    with open(filename, 'w') as f:
-        dill.dump(sentences, f)
-    f.close()
-    tac = timeit.default_timer()
-    print 'Finished pickling sentences in %.3f seconds' % (tac - tic)
+    if export:
+        filename = '%s_snippets.pkl' % rid
+        filename = base + filename
+        tic = timeit.default_timer()
+        with open(filename, 'w') as f:
+            dill.dump(sentences, f)
+        f.close()
+        tac = timeit.default_timer()
+        if verbose:
+            print 'Finished pickling sentences in %.3f seconds' % (tac - tic)
 
-    filename = '%s_sentiments.pkl' % rid
-    filename = base + filename
-    tic = timeit.default_timer()
-    with open(filename, 'w') as f:
-        dill.dump(sentiments, f)
-    f.close()
-    tac = timeit.default_timer()
-    print 'Finished pickling sentiments in %.3f seconds' % (tac - tic) 
+        filename = '%s_sentiments.pkl' % rid
+        filename = base + filename
+        tic = timeit.default_timer()
+        with open(filename, 'w') as f:
+            dill.dump(sentiments, f)
+        f.close()
+        tac = timeit.default_timer()
+        if verbose:
+            print 'Finished pickling sentiments in %.3f seconds' % (tac - tic) 
 
-    top_cat = [item for item in top_cat if item not in {'food', 'service', 
-               'ambience'}]    
+        top_cat = [item for item in top_cat if item not in {'food', 'service', 
+                   'ambience'}]    
 
     return sentences, sentiments
 
-def main4():
-    rest_name = 'Il Borgo'
+def example_from_backend():
+    '''
+    INPUT: None
+    OUTPUT: None
+
+    This is an example of how to call latent topic extraction
+    and sentiment analysis from the back_end folder.
+    '''
+    # rest_name = 'Il Borgo'
     base = '../front_end/data/'
-    sentences, sentiments = build_results(rest_name)
+    base_fig = '../front_end/app/static/img/'
+    df = pd.read_pickle(base + 'df_clean2a.pkl')
+    rest_names = df['rest_name'].unique()
 
-    for cat, sent in sentences.iteritems():
-        print cat
-        print sent
+    for rest_name in rest_names:
+        rid = int(df[df['rest_name'] == rest_name]['rid'].unique()[0])
+        if rid not in calculated_rid:
+            calculated_rid.add(rid)
+            print calculated_rid
+            print len(calculated_rid)
+            sentences, sentiments = build_results(rest_name, base, base_fig)
 
-    for cat, sent in sentiments.iteritems():
-        print cat
-        print sent 
+            for cat, sent in sentences.iteritems():
+                print cat
+                print sent
 
-    # df_SF = pd.read_pickle(data_SF)
-    # texts = df[df['rest_name'] == '/absinthe-brasserie-and-bar']['reviews']
-    # tic = timeit.default_timer()
-    # te.extract_onecat_topwords(texts, 'wine', 'test5_wine',
-    #                            categories=categories)
-    # toc = timeit.default_timer()
-    # print 'One category highlights in %3.f seconds' % (toc - tic)
-    # te.extract_onecat_topwords(texts, 'experience', 'test5_experience')
+            for cat, sent in sentiments.iteritems():
+                print cat
+                print sent 
 
-    # te = build_model(df, n_topics, ngram_range, max_words, max_iter, 
-    #                  top_filename, model_filename)
 
 if __name__ == '__main__':
-    main4()
+    # data_file = '../front_end/data/df_clean2a.pkl'
+    # model_filename = '../front_end/data/te_2a_extraSW.pkl'
+
+    example_from_backend()
