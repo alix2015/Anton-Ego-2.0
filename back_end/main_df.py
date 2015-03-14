@@ -177,7 +177,7 @@ def build_results(rest_name, base, base_fig):
     print 'Finished pickling sentiments in %.3f seconds' % (tac - tic) 
 
     top_cat = [item for item in top_cat if item not in {'food', 'service', 
-               'amibience'}]    
+               'ambience'}]    
 
     return sentences, sentiments
 

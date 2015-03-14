@@ -84,7 +84,7 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #495661; /* IE8 proofing */
+  color: #03c03c;/*#495661;*/ /* IE8 proofing */
   /*color: rgba(255,255,255,.75);*/
   border-bottom: 2px solid transparent;
 }
@@ -97,8 +97,8 @@ body {
 .masthead-nav > .active > a,
 .masthead-nav > .active > a:hover,
 .masthead-nav > .active > a:focus {
-  color: #333c44;
-  border-bottom-color: #333c44;
+  color: #03c03c;/*#333c44;*/
+  border-bottom-color: #03c03c;
 }
 
 @media (min-width: 768px) {

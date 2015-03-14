@@ -187,9 +187,11 @@ class BlobSentimentAnalysis(object):
         neg = [sentences[i] for i in idx_neg]
         subj = [sentences[i] for i in idx_subj]
 
-        return ([tup for tup in izip(sentiment[0, idx_pos], pos)],
-                [tup for tup in izip(sentiment[0, idx_neg], neg)],
-                [tup for tup in izip(sentiment[1, idx_subj], subj)])
+        pos = [tup for tup in izip(sentiment[0, idx_pos], pos)]
+        neg = [tup for tup in izip(sentiment[0, idx_neg], neg)]
+        subj = [tup for tup in izip(sentiment[1, idx_subj], subj)]
+
+        return [tup for tup in izip(pos, neg, subj)]
 
 
 class NPSentimentAnalysis(object):

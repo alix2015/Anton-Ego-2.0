@@ -61,6 +61,8 @@ def predict_page():
     rating_ambience = '%.2f' % df[mask]['ambience_rating'].mean()
 
     sentences, sentiments = build_results(rest_name, base, base_fig)
+    for tup in sentiments:
+        print tup
     special = {'food', 'service', 'ambience'}
     top = [cat for cat in sentences.keys() if cat not in special]
     cloud_food = base_fig + rid + '_food.png'
@@ -71,7 +73,8 @@ def predict_page():
     return render_template('result2a.html', rest_name=rest_name,
                            rest_names=rest_names, restos=restos,
                            rest_link=rest_link, top=top,
-                           rating=rating, sentences=sentences,
+                           rating=rating, sentiments=sentiments,
+                           sentences=sentences,
                            rating_food=rating_food, rating_service=rating_service,
                            rating_ambience=rating_ambience,
                            cloud_food=cloud_food, cloud_service=cloud_service,
