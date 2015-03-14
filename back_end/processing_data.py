@@ -218,6 +218,7 @@ class TopicExtraction(object):
     def extract_onecat_topwords(self,
                                 texts,
                                 category,
+                                cloud=False,
                                 filename,
                                 base='',
                                 top_n=5,
