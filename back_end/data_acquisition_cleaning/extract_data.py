@@ -61,7 +61,7 @@ class ExtractData(object):
         self.collection.
         Necessary to get all the lines corresponding to a rest_name 
         (one per page).
-        Pickle the dataframe to filename
+        Export the dataframe as CSV to filename
         '''
         
         # List of restaurants
@@ -199,9 +199,9 @@ def sampling_SF():
     cursor = coll.find({'rest_name': {'$in': sf_rest}})
     df = pd.DataFrame(list(cursor))
     print df.shape
-    df.to_pickle('../../front_end/data/df_clean2a.pkl')
-
+    df.to_csv('../../front_end/data/df_clean2a.csv', encoding='utf-8')
+    
 
 if __name__ == '__main__':
-    processing_tomongo()
+    # processing_tomongo()
     sampling_SF()

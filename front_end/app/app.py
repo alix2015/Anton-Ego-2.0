@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 import numpy as np
 import pandas as pd
 from itertools import izip
+import dill
 import sys
 sys.path.insert(0, '../../back_end/')
 from main_df import build_results
@@ -9,13 +10,14 @@ from main_df import build_results
 base = '../data/'
 base_fig = 'static/img/'
 
-df = pd.read_pickle(base + 'df_clean2a.pkl')
+df = pd.read_csv(base + 'df_clean2a.csv')
 rest_names = df['rest_name'].unique()
-rid = df['rid'].unique()
+rid = df['rid'].astype(str).unique()
 restos = [t for t in izip(rid, rest_names)]
 restos.sort(key=lambda t: t[1])
 
 PORT = 8888
+# PORT = 80
 app = Flask(__name__)
 
 
@@ -40,7 +42,7 @@ def predict_page():
     # get data from request form, the key is the restaurant id
     rid = request.form['user_choice']
     
-    mask = df['rid'] == rid
+    mask = df['rid'] == int(rid)
     rest_name = df[mask]['rest_name'].values[0]
     rest_link = df[mask]['url'].values[0]
     rating = '%.2f' % df[mask]['rating'].mean()
@@ -48,21 +50,21 @@ def predict_page():
     rating_service = '%.2f' %  df[mask]['service_rating'].mean()
     rating_ambience = '%.2f' % df[mask]['ambience_rating'].mean()
 
-    sentences, sentiments = build_results(rest_name, base, base_fig)
+    sentences, sentiments = build_results(rest_name, base)
     for tup in sentiments:
         print tup
     special = {'food', 'service', 'ambience'}
     top = [cat for cat in sentences.keys() if cat not in special]
     cloud_food = base_fig + rid + '_food.png'
-    cloud_service = base_fig + rid + '_service.png'
-    cloud_ambience = base_fig + rid + '_ambience.png'
+    cloud_service = base_fig + rid +'_service.png'
+    cloud_ambience = base_fig + rid +'_ambience.png'
     clouds = [base_fig + rid + '_' + cat + '.png' for cat in top]
 
     return render_template('result2a.html', rest_name=rest_name,
                            rest_names=rest_names, restos=restos,
                            rest_link=rest_link, top=top,
                            rating=rating, sentiments=sentiments,
-                           sentences=sentences, rating_food=rating_food,
+                           rating_food=rating_food,
                            rating_service=rating_service,
                            rating_ambience=rating_ambience,
                            cloud_food=cloud_food, cloud_service=cloud_service,

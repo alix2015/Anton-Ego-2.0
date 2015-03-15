@@ -50,7 +50,7 @@ def model_initializing(data_file, model_file, verbose=True):
     in model_filename out. The optional boolean input switches the verbosity.
     '''
     
-    df = pd.read_pickle(data_file)
+    df = pd.read_csv(data_file)
     texts = df['review']
 
     n_topics = 100
@@ -58,7 +58,7 @@ def model_initializing(data_file, model_file, verbose=True):
     max_words = 5000
     max_iter = 400
 
-    top_filename = '../../data/te_2_20_%d_%dgram_max_%d_100_extraStopW.txt' % \
+    top_filename = '../../data/te_2_20_%d_%dgram_max_%d_100_extraStopW_ch.txt' %\
                     (n_topics, ngram_range[1], max_words)
 
     tic = timeit.default_timer()
@@ -84,7 +84,8 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
     and sentiments are pickled.
     '''
     # paths have to be written from the front_end/app/ viewpoint
-    df = pd.read_pickle(base + 'df_clean2a.pkl')
+    df = pd.read_csv(base + 'df_clean2a.csv')
+    # df = pd.read_pickle(base + 'df_clean2a.pkl')
     texts = df['review']
 
     model_filename = base + 'te_2a_extraSW.pkl'
@@ -117,7 +118,7 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
     tic = timeit.default_timer()
     for c in top_cat:
         if base_fig:
-            cloud_name = '%s_%s' % (rid, c)
+            cloud_name = '%d_%s' % (rid, c)
             cloud_name = base_fig + cloud_name
             print cloud_name
             te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
@@ -130,25 +131,23 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
         print 'End looping in %.3f seconds' % (tac - tic)
 
     if export:
-        filename = '%s_snippets.pkl' % rid
-        filename = base + filename
         tic = timeit.default_timer()
-        with open(filename, 'w') as f:
-            dill.dump(sentences, f)
-        f.close()
+        filename = base + ('%d_snippets.csv' % rid)
+        sent = pd.DataFrame([[c, sent] for c, v in sentences.iteritems()
+                            for sent in v])
+        sent.to_csv(filename)
         tac = timeit.default_timer()
         if verbose:
-            print 'Finished pickling sentences in %.3f seconds' % (tac - tic)
+            print 'Finished exporting sentences in %.3f seconds' % (tac - tic)
 
-        filename = '%s_sentiments.pkl' % rid
-        filename = base + filename
         tic = timeit.default_timer()
-        with open(filename, 'w') as f:
-            dill.dump(sentiments, f)
-        f.close()
+        filename = base + ('%d_sentiments.csv' % rid)
+        sent = pd.DataFrame([[c, tup] for c, v in
+                            sentiments.iteritems() for tup in v])
+        sent.to_csv(filename)
         tac = timeit.default_timer()
         if verbose:
-            print 'Finished pickling sentiments in %.3f seconds' % (tac - tic) 
+            print 'Finished exporting sentiments in %.3f seconds' % (tac - tic) 
 
         top_cat = [item for item in top_cat if item not in {'food', 'service', 
                    'ambience'}]    
@@ -165,9 +164,16 @@ def example_from_backend():
     '''
     # rest_name = 'Il Borgo'
     base = '../front_end/data/'
+    # base = '../../data/sentiments_AWS/'
     base_fig = '../front_end/app/static/img/'
-    df = pd.read_pickle(base + 'df_clean2a.pkl')
+    # df = pd.read_pickle(base + 'df_clean2a.pkl')
+    df = pd.read_csv(base + 'df_clean2a.csv')
+
+    print df.shape
+
     rest_names = df['rest_name'].unique()
+
+    calculated_rid = set([])
 
     for rest_name in rest_names:
         rid = int(df[df['rest_name'] == rest_name]['rid'].unique()[0])
@@ -175,7 +181,7 @@ def example_from_backend():
             calculated_rid.add(rid)
             print calculated_rid
             print len(calculated_rid)
-            sentences, sentiments = build_results(rest_name, base, base_fig)
+            sentences, sentiments = build_results(rest_name, base, export=True)
 
             for cat, sent in sentences.iteritems():
                 print cat
@@ -187,7 +193,9 @@ def example_from_backend():
 
 
 if __name__ == '__main__':
-    # data_file = '../front_end/data/df_clean2a.pkl'
+    # data_file = '../front_end/data/df_clean2a.csv'
     # model_filename = '../front_end/data/te_2a_extraSW.pkl'
+
+    # model_initializing(data_file, model_filename)
 
     example_from_backend()
