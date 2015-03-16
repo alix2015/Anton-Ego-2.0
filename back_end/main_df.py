@@ -1,10 +1,12 @@
 import numpy as np 
 import pandas as pd 
+import matplotlib.pyplot as plt
 from categories import Categories
 from processing_data import TopicExtraction
 from sentiment_analysis import BlobSentimentAnalysis
 import dill
 import timeit
+import json
 
 
 # Utilities for a pipeline based on dataframes
@@ -58,7 +60,7 @@ def model_initializing(data_file, model_file, verbose=True):
     max_words = 5000
     max_iter = 400
 
-    top_filename = '../../data/te_2_20_%d_%dgram_max_%d_100_extraStopW_ch.txt' %\
+    top_filename = '../../data/te_3a_20_%d_%dgram_max_%d_100_extraStopW.txt' %\
                     (n_topics, ngram_range[1], max_words)
 
     tic = timeit.default_timer()
@@ -84,14 +86,14 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
     and sentiments are pickled.
     '''
     # paths have to be written from the front_end/app/ viewpoint
-    df = pd.read_csv(base + 'df_clean2a.csv')
+    df = pd.read_csv(base + 'df_clean3a.csv')
     # df = pd.read_pickle(base + 'df_clean2a.pkl')
     texts = df['review']
 
-    model_filename = base + 'te_2a_extraSW.pkl'
+    model_filename = base + 'te_3a_extraSW.pkl'
     te = dill.load(open(model_filename, 'rb'))
     categories = Categories()
-    special = {'food', 'service', 'ambience'}
+    special = {'Food', 'Service', 'Ambience'}
 
     sent_analyzer = BlobSentimentAnalysis()
 
@@ -104,7 +106,8 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
     top_cat = te.top_categories(texts, cat=categories)
     for c in special:
         if c not in top_cat:
-            top_cat = np.append(top_cat, c)
+            # top_cat = np.append(top_cat, c)
+            top_cat.append(c)
     if verbose:
         print top_cat
     tac = timeit.default_timer()
@@ -122,8 +125,8 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
             cloud_name = base_fig + cloud_name
             print cloud_name
             te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
-        else:
-            te.extract_onecat_topwords(texts, c)
+        # else:
+        #     te.extract_onecat_topwords(texts, c)
         sentences[c] = te.extract_onecat_sentences(texts, c, token=False)
         sentiments[c] = sent_analyzer.sentiment_sentences(sentences[c])
     tac = timeit.default_timer()
@@ -142,17 +145,17 @@ def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
 
         tic = timeit.default_timer()
         filename = base + ('%d_sentiments.csv' % rid)
-        sent = pd.DataFrame([[c, tup] for c, v in
-                            sentiments.iteritems() for tup in v])
+        sent = pd.DataFrame([[c, dic] for c, v in
+                            sentiments.iteritems() for dic in v])
         sent.to_csv(filename)
         tac = timeit.default_timer()
         if verbose:
             print 'Finished exporting sentiments in %.3f seconds' % (tac - tic) 
 
-        top_cat = [item for item in top_cat if item not in {'food', 'service', 
-                   'ambience'}]    
+        top_cat = [item for item in top_cat if item not in {'Food', 'Service', 
+                   'Ambience'}]    
 
-    return sentences, sentiments
+    return sentiments
 
 def example_from_backend():
     '''
@@ -162,34 +165,139 @@ def example_from_backend():
     This is an example of how to call latent topic extraction
     and sentiment analysis from the back_end folder.
     '''
-    # rest_name = 'Il Borgo'
     base = '../front_end/data/'
     # base = '../../data/sentiments_AWS/'
     base_fig = '../front_end/app/static/img/'
     # df = pd.read_pickle(base + 'df_clean2a.pkl')
-    df = pd.read_csv(base + 'df_clean2a.csv')
+    df = pd.read_csv(base + 'df_clean3a.csv')
 
     print df.shape
 
     rest_names = df['rest_name'].unique()
+    # rest_names = ["Harris'"]
+    # rest_names = ["Aliment"]
 
     calculated_rid = set([])
+    cnt = 0
 
     for rest_name in rest_names:
-        rid = int(df[df['rest_name'] == rest_name]['rid'].unique()[0])
+        rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
+        if cnt > 5:
+            break
         if rid not in calculated_rid:
+            cnt += 1
             calculated_rid.add(rid)
             print calculated_rid
             print len(calculated_rid)
-            sentences, sentiments = build_results(rest_name, base, export=True)
+            sentiments = build_results2(rest_name, base, export=True)
+            # sentences, sentiments = build_results2(rest_name, base, export=True)
 
-            for cat, sent in sentences.iteritems():
-                print cat
-                print sent
+            # for cat, sent in sentences.iteritems():
+            #     print cat
+            #     print sent
 
-            for cat, sent in sentiments.iteritems():
-                print cat
-                print sent 
+            # for cat, sent in sentiments.iteritems():
+            #     print cat
+            #     print sent 
+
+
+# -----------------------------------------------------------------------------
+# SENTIMENT DISTRIBUTION
+# -----------------------------------------------------------------------------
+
+def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
+    '''
+    INPUT: string, string, string, [boolean, boolean]
+    OUTPUT: dictionary, dictionary
+
+    This function uses an initialized TopicExtraction model
+    and a dataset to perform latent feature extraction and
+    sentiment analysis on this dataset. It returns a dictionary
+    of sentences inedxed by category and a dictionary of sentiment
+    output indexed by category.
+    The optional verbose boolean controls verbosity.
+    The optional export boolean controls whether sentence categorization
+    and sentiments are pickled.
+    '''
+    # paths have to be written from the front_end/app/ viewpoint
+    df = pd.read_csv(base + 'df_clean3a.csv')
+    # df = pd.read_pickle(base + 'df_clean2a.pkl')
+    texts = df['review']
+
+    model_filename = base + 'te_3a_extraSW.pkl'
+    te = dill.load(open(model_filename, 'rb'))
+    categories = Categories()
+    special = {'Food', 'Service', 'Ambience'}
+
+    sent_analyzer = BlobSentimentAnalysis()
+
+    texts = df[df['rest_name'] == rest_name]['review'].values
+    rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
+
+    if verbose:
+        print 'Running top_cat...'
+    tic = timeit.default_timer()
+    top_cat = te.top_categories(texts, cat=categories)
+    for c in special:
+        if c not in top_cat:
+            # top_cat = np.append(top_cat, c)
+            top_cat.append(c)
+    if verbose:
+        print top_cat
+    tac = timeit.default_timer()
+    if verbose:
+        print 'Finished top_cat in %.3f seconds' % (tac - tic)
+
+    sentences = {}
+    sentiments = {}
+    if verbose:
+        print 'Looping over categories...'
+    tic = timeit.default_timer()
+    for c in top_cat:
+        # if base_fig:
+        #     cloud_name = '%d_%s' % (rid, c)
+        #     cloud_name = base_fig + cloud_name
+        #     print cloud_name
+        #     te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
+        # else:
+        #     te.extract_onecat_topwords(texts, c)
+        sentences[c] = te.extract_onecat_sentences(texts, c, token=False)
+        sentiments[c] = sent_analyzer.sentiment_sentences(sentences[c])
+        
+        if base_fig:
+            for c in sentiments:
+                plt.figure(figsize=(10, 8))
+                sent = np.array([s[0][0] for s in sentiments[c]])
+                if sent.shape[0] > 1:
+                    plt.hist(sent, bins=20)
+                    plt.savefig(base_fig + ('%d_%s_sentiments.png' % (rid, c)))
+                    plt.figure(figsize=(10, 8))
+                    subj = np.array([s[0][1] for s in sentiments[c]])
+                    plt.hist(subj, bins=20)
+                    plt.savefig(base_fig + ('%d_%s_subjsectivity.png' % (rid, c)))
+                    plt.close()
+    tac = timeit.default_timer()
+    if verbose:
+        print 'End looping in %.3f seconds' % (tac - tic)
+
+    if export:
+        tic = timeit.default_timer()
+        filename = base + ('%d_sentiments.csv' % rid)
+        sent = pd.DataFrame([[c, t[0][0], t[0][1], t[1]] for c, v in
+                            sentiments.iteritems() for t in v])
+        sent.columns = ['category', 'sentiment', 'subjectivity', 'sentence']
+        sent.to_csv(filename)
+        tac = timeit.default_timer()
+        if verbose:
+            print 'Finished exporting sentiments in %.3f seconds' % (tac - tic) 
+
+        top_cat = [item for item in top_cat if item not in {'Food', 'Service', 
+                   'Ambience'}]    
+
+    return sentiments
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 if __name__ == '__main__':

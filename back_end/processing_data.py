@@ -83,10 +83,10 @@ class TopicExtraction(object):
             # Adding genering words
             self.stopwords.append('restaurant')
             self.stopwords.append('restaurants')
-            self.stopwords.append('food')
-            self.stopwords.append('ambience')
-            self.stopwords.append('service')
-            self.stopwords.append('dining')
+            # self.stopwords.append('food')
+            # self.stopwords.append('ambience')
+            # self.stopwords.append('service')
+            # self.stopwords.append('dining')
             self.rest_names = None # TO AVOID REPROCESSING
             self.stopwords = set(self.stopwords)
             if self.verbose:
@@ -264,12 +264,19 @@ class TopicExtraction(object):
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
+        # print category
+            
         for topic in self.categories.get(category):
-            idx = np.argsort(W[:, topic])[-1:-6:-1]
+            # idx = np.argsort(W[:, topic])[-1:-21:-1]
+            # print topic
+            # print W[:, topic].max(), W[:, topic].min()
+            idx = W[:, topic] > 0
             if token:
-                docs = [self.my_tokenize(texts[i]) for i in idx]
+                # docs = [self.my_tokenize(texts[i]) for i in idx]
+                docs = [self.tokenize(t) for i,t in enumerate(texts) if idx[i]]
             else:
-                docs = [texts[i] for i in idx]
+                # docs = [texts[i] for i in idx]
+                docs = [t for i, t in enumerate(texts) if idx[i]]
 
         return docs
 
@@ -308,5 +315,6 @@ class TopicExtraction(object):
                     max_coef[idx] = m
             idx += 1
 
-        names = np.array(names)
-        return names[np.argsort(max_coef)[-1:-(top_n+1):-1]]
+        # names = np.array(names)
+        # return names[np.argsort(max_coef)[-1:-(top_n+1):-1]]
+        return [names[i] for i in np.argsort(max_coef)][-1:-(top_n + 1):-1]
