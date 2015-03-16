@@ -19,7 +19,7 @@ restos = [t for t in izip(rid, rest_names)]
 restos.sort(key=lambda t: t[1])
 
 PORT = 8888
-# PORT = 80
+# PORT = 80  # (AWS)
 app = Flask(__name__)
 
 
@@ -75,9 +75,7 @@ def predict_page():
                            rating=rating, sentiments=sentiments,
                            rating_food=rating_food,
                            rating_service=rating_service,
-                           rating_ambience=rating_ambience,
-                           cloud_food=cloud_food, cloud_service=cloud_service,
-                           cloud_ambience=cloud_ambience, clouds=clouds)
+                           rating_ambience=rating_ambience)
     
 
 def define_hist(x, cat):
@@ -106,7 +104,7 @@ def define_hist(x, cat):
     axis_style=dict(tickfont=Font(size=14),   # font size (default is 12)
                     titlefont=Font(size=14),  # title font size (default is 12)
                     zeroline=False,           # remove thick zero line
-                    autotick=False            # turn off autotick
+                    autotick=True            
                     )
 
     layout = Layout(

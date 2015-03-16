@@ -1,6 +1,5 @@
-import numpy as np 
-import pandas as pd 
-import matplotlib.pyplot as plt 
+import numpy as np
+import matplotlib.pyplot as plt
 from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
@@ -43,7 +42,6 @@ class TopicExtraction(object):
         self.categories = categories
         self.fonts_ = '/Library/Fonts/Georgia.ttf'
         self.wordcloud = WordCloud(font_path=self.fonts_)
-        
 
     def my_tokenize(self, text):
         '''
@@ -53,14 +51,13 @@ class TopicExtraction(object):
         tokenizing
         '''
         text = text.lower().encode('ascii', errors='ignore')
-        # list_tokenized = RegexpTokenizer(r'\w+').tokenize(text)
         list_tokenized = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
                                          gaps=True).tokenize(text)
         if self.rest_names:
             if self.verbose:
                 tic = timeit.default_timer()
             rest_names = ' '.join(self.rest_names).lower()\
-                        .encode('ascii', errors='ignore')
+                .encode('ascii', errors='ignore')
             rest_names = RegexpTokenizer(r'\W\s+|\s+\W|\W+\b|\b\W+',
                                          gaps=True).tokenize(rest_names)
             for name in rest_names:
@@ -83,14 +80,14 @@ class TopicExtraction(object):
             # Adding genering words
             self.stopwords.append('restaurant')
             self.stopwords.append('restaurants')
-            self.rest_names = None # TO AVOID REPROCESSING
+            self.rest_names = None    # TO AVOID REPROCESSING
             self.stopwords = set(self.stopwords)
             if self.verbose:
                 tac = timeit.default_timer()
                 print 'Adding restaurants in %d seconds' % (tac - tic)
-        list_tokenized = [word for word in list_tokenized\
-                            if word not in self.stopwords]
-        
+        list_tokenized = [word for word in list_tokenized
+                          if word not in self.stopwords]
+
         return list_tokenized
 
     def fit_transform(self, texts):
@@ -101,8 +98,8 @@ class TopicExtraction(object):
         '''
         if self.sentence:
             texts = [sent for item in
-                    [sent_tokenize(text) for text in texts] for
-                    sent in item] 
+                     [sent_tokenize(text) for text in texts] for
+                     sent in item]
         if self.verbose:
             tic = timeit.default_timer()
             print 'Starting Tfidf vectorizer...'
@@ -118,7 +115,7 @@ class TopicExtraction(object):
             print 'Finished vectorizing in %3.f' % (toc - tic)
         self.H_ = self.factorizor.components_
         self.trained = True
-        
+
         return W
 
     def extract_top_words(self, texts, top_n=10, top_filename=None,
@@ -142,10 +139,10 @@ class TopicExtraction(object):
             if wordcloud:
                 self.cloud_fig(top_words[topic],
                                '../data/nouncloud_%d.png' % topic)
-        
+
         if top_filename:
             with open(top_filename, 'w') as f:
-                f.write('n_gram: %d, %d' % (self.ngram_range[0], 
+                f.write('n_gram: %d, %d' % (self.ngram_range[0],
                         self.ngram_range[1]))
                 f.write('\n')
                 f.write('n_topics: %d' % self.n_topics)
@@ -178,7 +175,7 @@ class TopicExtraction(object):
         plt.axis('off')
         plt.savefig(filename)
         plt.close()
-        
+
     def _define_categories(self, categories):
         '''
         INPUT: TopicExtraction object, dictionary
@@ -192,7 +189,7 @@ class TopicExtraction(object):
         Possible improvement: using an ontology
         '''
         self.categories = categories
-        
+
     def extract_onecat_topwords(self, texts, category, filename=False,
                                 base='', top_n=5, cat=None):
         '''
@@ -211,12 +208,12 @@ class TopicExtraction(object):
             if cat:
                 self._define_categories(cat)
             else:
-                print 'Please provide a dictionary to initialize the categories'
+                print 'Please provide a dictionary to initialize categories'
                 return
         if self.sentence:
             texts = [sent for item in
-                    [sent_tokenize(text) for text in texts] for
-                    sent in item]
+                     [sent_tokenize(text) for text in texts] for
+                     sent in item]
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
@@ -226,18 +223,17 @@ class TopicExtraction(object):
             temp = [self.my_tokenize(texts[idx]) for idx in top_doc_idx]
             temp = [item for sublist in temp for item in sublist
                     if item not in self.stopwords]
-            
+
             for item in temp:
                 top_words.append(item)
-        
+
         if filename:
             self.cloud_fig(top_words, '%s.png' % filename)
         return top_words
 
-
     def extract_onecat_sentences(self, texts, category, cat=None, token=True):
         '''
-        INPUT: TopicExtraction object, list of strings, string, 
+        INPUT: TopicExtraction object, list of strings, string,
         <categories, boolean>
         OUTPUT: list of list of strings
 
@@ -251,19 +247,18 @@ class TopicExtraction(object):
             if cat:
                 self._define_categories(cat)
             else:
-                print 'Please provide a dictionary to initialize the categories'
+                print 'Please provide a dictionary to initialize categories'
                 return
 
-        texts = [sent for item in [sent_tokenize(text) for text in texts]\
+        texts = [sent for item in [sent_tokenize(text) for text in texts]
                  for sent in item]
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)
 
-            
         for topic in self.categories.get(category):
             idx = W[:, topic] > 0
             if token:
-                docs = [self.tokenize(t) for i,t in enumerate(texts) if idx[i]]
+                docs = [self.tokenize(t) for i, t in enumerate(texts) if idx[i]]
             else:
                 docs = [t for i, t in enumerate(texts) if idx[i]]
 
@@ -281,14 +276,14 @@ class TopicExtraction(object):
             if cat:
                 self._define_categories(cat)
             else:
-                print 'Please provide a dictionary to initialize the categories'
+                print 'Please provide a dictionary to initialize categories'
                 return
 
-        # What are the most relevant categories?
-        # The ones that yield the largest projections on
-        # the category subspace
-        
-        texts = [sent for item in [sent_tokenize(text) for text in texts]\
+        # The most significant categories are here defined
+        # as the ones that yield the largest projections onto
+        # their subspace
+
+        texts = [sent for item in [sent_tokenize(text) for text in texts]
                  for sent in item]
         V = self.vectorizer.transform(texts)
         W = self.factorizor.transform(V)

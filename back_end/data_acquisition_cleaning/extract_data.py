@@ -1,5 +1,5 @@
-import numpy as np 
-import pandas as pd 
+import numpy as np
+import pandas as pd
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 import re
@@ -19,7 +19,6 @@ class ExtractData(object):
         # TODO: not harcoding the name of the collection
         self.collection = self.db.review2
         self.collectionOut = self.db.clean2a
-
 
     def to_mongo(self):
         '''
@@ -41,42 +40,43 @@ class ExtractData(object):
 
             for tup in data:
                 self.collectionOut.insert({'url': url,
-                                          'rest_name': rest_name,
-                                          'rid': rid,
-                                          'review_title': tup[0],
-                                          'review_length': tup[1],
-                                          'review': tup[2],
-                                          'rating': tup[3],
-                                          'food_rating': tup[4],
-                                          'service_rating': tup[5],
-                                          'ambience_rating': tup[6],
-                                          'address': tup[7]})
+                                           'rest_name': rest_name,
+                                           'rid': rid,
+                                           'review_title': tup[0],
+                                           'review_length': tup[1],
+                                           'review': tup[2],
+                                           'rating': tup[3],
+                                           'food_rating': tup[4],
+                                           'service_rating': tup[5],
+                                           'ambience_rating': tup[6],
+                                           'address': tup[7]})
 
     def to_dataframe(self, filename):
         '''
         INPUT: ExtractData object, string
         OUTPUT: pandas dataframe
-        
+
         Extracting the reviews from the raw html stored in MongoDB
         self.collection.
-        Necessary to get all the lines corresponding to a rest_name 
+        Necessary to get all the lines corresponding to a rest_name
         (one per page).
-        Export the dataframe as CSV to filename
+        Export the dataframe as CSV to filename.
         '''
-        
+
         # List of restaurants
         restos = self.collection.distinct('rest_name')
 
         df_list = []
         for r in restos:
-            cursor = self.collection.find({'rest_name': r}, 
-                                          {'rest_name': 1, 'html': 1, '_id': 0})
+            cursor = self.collection.find({'rest_name': r},
+                                          {'rest_name': 1, 'html': 1,
+                                           '_id': 0})
             df = pd.DataFrame(list(cursor))
             df['data'] = df['html'].map(self.data)
 
-            df2 = pd.concat([pd.Series(row['rest_name'], row['data']) for 
+            df2 = pd.concat([pd.Series(row['rest_name'], row['data']) for
                             _, row in df.iterrows()]).reset_index()
-            
+
             df3 = df2['index'].apply(pd.Series)
             df3['rest_name'] = df['rest_name']
             df3.columns = ['review_titles',
@@ -97,8 +97,6 @@ class ExtractData(object):
 
         return df3
 
-
-
     def data(self, raw):
         '''
         INPUT: raw html
@@ -111,27 +109,27 @@ class ExtractData(object):
         listings = soup.select('div.review-content')
         reviews = [x.text.strip() for x in listings]
         review_lengths = [len(r) for r in reviews]
-        
+
         # Title of the reviews
         listings = soup.select('h4.review-title')
         review_titles = [x.text.strip() for x in listings]
-        
+
         # Ratings
         listings = soup.find_all('meta', {'itemprop': 'ratingValue'})
         ratings = [float(x['content']) for x in listings]
-        
+
         # Category ratings
         listings = soup.select('span.review-stars-results-num')
         detailed_ratings = [float(x.text.strip()) for x in listings]
         n = len(detailed_ratings) / 3
         food_rating = [detailed_ratings[3*i] for i in xrange(n)]
         service_rating = [detailed_ratings[3*i + 1] for i in xrange(n)]
-        ambience_rating = [detailed_ratings[3*i + 2] for i  in xrange(n)]
+        ambience_rating = [detailed_ratings[3*i + 2] for i in xrange(n)]
 
         # Address
         listings = soup.find_all('div', {'itemprop': 'streetAddress'})
         address = [x.text.strip() for x in listings]
-        
+
         return [t for t in itertools.izip(review_titles,
                                           review_lengths,
                                           reviews,
@@ -149,7 +147,8 @@ def parse_address(address):
 
     This function parses most address in the USA and Canada
     '''
-    pattern = r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\w\w\w\s*\w\w+)'
+    pattern = \
+        r'([\w+\s]+[A-Z]\w+\.*)([A-Z]\w+\s*\w*,\s[A-Z][A-Z])\s+(\w\w\w\s*\w\w+)'
     pattern = re.compile(pattern)
     m = pattern.search(address)
     if m:
@@ -172,6 +171,7 @@ def processing_tomongo():
     extractor.to_mongo()
     toc = timeit.default_timer()
     print 'Extraction finished in %.3f seconds.' % (toc - tic)
+
 
 def sampling_SF():
     '''
@@ -200,7 +200,7 @@ def sampling_SF():
     df = pd.DataFrame(list(cursor))
     print df.shape
     df.to_csv('../../front_end/data/df_clean2a.csv', encoding='utf-8')
-    
+
 
 if __name__ == '__main__':
     # processing_tomongo()

@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
@@ -11,6 +11,7 @@ import time
 This file defines the functions necessary to scrape Open Table
 restaurant review pages.
 '''
+
 
 def get_resto_links(n):
     '''
@@ -79,22 +80,20 @@ def scrape_reviews(profile_url, rid, rest_name, review_cnt, page_cnt,
     failed scraping in pb.
     '''
     print 'Scraping %s' % rest_name
-    
+
     if review_cnt:
         for p in xrange(int(page_cnt)):
             if not (p % 5):
                 print 'Review page %d' % (p + 1)
             url = profile_url + '?rid=' + rid + '&tab=2&page=' + str(p + 1)
-            # print url
             try:
-                response = requests.get(url) 
-                # print response.status_code
-                
+                response = requests.get(url)
+
                 if response.status_code == 200:
                     collection.insert({'url': response.url,
-                                      'rest_name': rest_name,
-                                      'rid': rid,
-                                      'html': response.content})
+                                       'rest_name': rest_name,
+                                       'rid': rid,
+                                       'html': response.content})
                 time.sleep(0.5)
             except requests.exceptions.RequestException:
                 time.sleep(5)
@@ -123,9 +122,9 @@ if __name__ == '__main__':
 
             scrape_reviews(profile_url,
                            rid,
-                           rest_name, 
-                           review_cnt, 
-                           page_cnt, 
+                           rest_name,
+                           review_cnt,
+                           page_cnt,
                            coll)
             count += 1
             time.sleep(1)
@@ -141,9 +140,9 @@ if __name__ == '__main__':
 
             scrape_reviews(profile_url,
                            rid,
-                           rest_name, 
-                           review_cnt, 
-                           page_cnt, 
+                           rest_name,
+                           review_cnt,
+                           page_cnt,
                            coll,
                            pb)
             count += 1

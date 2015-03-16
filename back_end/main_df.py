@@ -2,14 +2,19 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 from categories import Categories
-from processing_data import TopicExtraction
+from topics import TopicExtraction
 from sentiment_analysis import BlobSentimentAnalysis
 import dill
 import timeit
-import json
 
 
-# Utilities for a pipeline based on dataframes
+# -----------------------------------------------------------------------------
+# UTILITIES TO USE PANDAS DATAFRAME
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# MODEL INITIALIZATION
+# -----------------------------------------------------------------------------
 
 def build_model(df, n_topics, ngram_range, max_words, max_iter, model_filename,
                 top_filename=None):
@@ -70,38 +75,6 @@ def model_initializing(data_file, model_file, verbose=True):
     if verbose:
         print 'Building model in %3.f seconds' % (toc - tic)
 
-
-def example_from_backend():
-    '''
-    INPUT: None
-    OUTPUT: None
-
-    This is an example of how to call latent topic extraction
-    and sentiment analysis from the back_end folder.
-    '''
-    base = '../front_end/data/'
-    base_fig = '../front_end/app/static/img/'
-    df = pd.read_csv(base + 'df_clean3a.csv')
-
-    print df.shape
-
-    rest_names = df['rest_name'].unique()
-    
-    calculated_rid = set([])
-    cnt = 0
-
-    for rest_name in rest_names:
-        rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
-        if cnt > 5:
-            break
-        if rid not in calculated_rid:
-            cnt += 1
-            calculated_rid.add(rid)
-            print calculated_rid
-            print len(calculated_rid)
-            sentiments = build_results2(rest_name, base, export=True)
-            
-
 # -----------------------------------------------------------------------------
 # SENTIMENT DISTRIBUTION
 # -----------------------------------------------------------------------------
@@ -141,7 +114,6 @@ def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
     top_cat = te.top_categories(texts, cat=categories)
     for c in special:
         if c not in top_cat:
-            # top_cat = np.append(top_cat, c)
             top_cat.append(c)
     if verbose:
         print top_cat
@@ -198,13 +170,46 @@ def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
     return sentiments
 
 # -----------------------------------------------------------------------------
+# EXAMPLE OF USE
 # -----------------------------------------------------------------------------
 
+def example_from_backend():
+    '''
+    INPUT: None
+    OUTPUT: None
+
+    This is an example of how to call latent topic extraction
+    and sentiment analysis from the back_end folder.
+    '''
+    base = '../front_end/data/'
+    base_fig = '../front_end/app/static/img/'
+    df = pd.read_csv(base + 'df_clean3a.csv')
+
+    print df.shape
+
+    rest_names = df['rest_name'].unique()
+    
+    calculated_rid = set([])
+    cnt = 0
+
+    for rest_name in rest_names:
+        rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
+        if cnt > 5:
+            break
+        if rid not in calculated_rid:
+            cnt += 1
+            calculated_rid.add(rid)
+            print calculated_rid
+            print len(calculated_rid)
+            sentiments = build_results2(rest_name, base, export=True)
+            
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    # data_file = '../front_end/data/df_clean2a.csv'
-    # model_filename = '../front_end/data/te_2a_extraSW.pkl'
+    data_file = '../front_end/data/df_clean3a.csv'
+    model_filename = '../front_end/data/te_3a_extraSW.pkl'
 
-    # model_initializing(data_file, model_filename)
+    model_initializing(data_file, model_filename)
 
     example_from_backend()

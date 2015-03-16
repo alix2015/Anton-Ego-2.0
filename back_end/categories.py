@@ -2,6 +2,16 @@ import json
 
 
 class Categories(object):
+    '''
+    Categories class objects store a mapping between identified
+    categories and the index of the corresponding latent features.
+    An object can be instanciated with no argument, in which case
+    the internal mapping is used. It can be instanciated with
+    a dictionary stored as a JSON, passed as in_file. Upon instanciation,
+    it is possible to save the mapping into a JSON, passed as out_file.
+    It has a unique method get, which returns the set of indices
+    corresponding to a given category.
+    '''
     def __init__(self, in_file=None, out_file=None):
         self.dic = {}
         self._initialize()
@@ -68,6 +78,8 @@ class Categories(object):
         '''
         return self.dic.get(category, {})
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
     out_file = '../front_end/data/categories_2a_extraSW.json'

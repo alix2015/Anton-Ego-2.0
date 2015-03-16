@@ -15,7 +15,7 @@
     <link href="../static/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="/static/css/dashboard.css" rel="stylesheet">
+    <link href="../static/css/dashboard.css" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -91,7 +91,7 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           {% block content%}
           <h1 class="page-header">{{rest_name}}</h1>
-          For information: this restaurant is rated: {{rating}}/5
+          This restaurant is rated {{rating}}/5 on Open Table.
           <a href="#Food"></a>
           <div class="container-fluid"  id="Food">
             <h2 class="row">Food snippets</h2>
