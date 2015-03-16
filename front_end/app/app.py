@@ -13,7 +13,6 @@ base = '../data/'
 base_fig = 'static/img/'
 
 df = pd.read_csv(base + 'df_clean3a.csv')
-# rest_names = df['rest_name'].unique()
 rid = df['rid'].astype(str).unique()
 rest_names = [df[df['rid'] == int(r)]['rest_name'].unique()[0] for r in rid]
 restos = [t for t in izip(rid, rest_names)]
@@ -50,9 +49,6 @@ def predict_page():
     
     mask = df['rid'] == int(rid)
     rest_name = df[mask]['rest_name'].values[0]
-    # print df[mask]['rest_name'].unique()
-    # print rest_name
-    # print df[df['rest_name'] == rest_name]['rid'].unique()
     rest_link = df[mask]['url'].values[0]
     rating = '%.2f' % df[mask]['rating'].mean()
     rating_food = '%.2f' %  df[mask]['food_rating'].mean()
@@ -61,24 +57,10 @@ def predict_page():
 
     sentiments = build_results2(rest_name, base, verbose=False)
     plot_url = {}
-    # xbins_start = -1.0
-    # xbins_end = 1.0
-    # xbin_size = 5
-    # color = 'rgb(106,204,101)'
     for c in sentiments:
-      x = [t[0][0] for t in sentiments[c]]
-      # text = []
-      # data = Data([Histogram(
-      #             x=x,
-      #             marker=Marker(color=color),
-      #             name="<b>{}</b>".format(c),
-      #             xbins=XBins(start=xbins_start, end=xbins_end,
-      #                         size=xbin_size)
-      #             )])
-      plot_url[c] = py.iplot(define_hist(x, c)).resource
-      # print plot_url[c]
-    # for tup in sentiments:
-    #     print tup
+        x = [t[0][0] for t in sentiments[c]]
+        plot_url[c] = py.iplot(define_hist(x, c)).resource
+    
     special = {'Food', 'Service', 'Ambience'}
     top = [cat for cat in sentiments.keys() if cat not in special]
     cloud_food = base_fig + rid + '_food.png'
@@ -104,7 +86,7 @@ def define_hist(x, cat):
     xbins_end = 1.0
     xbin_size = 5
     color_pos = 'rgb(106,204,101)'
-    color_neg = 'rgb(204,106,101)'
+    color_neg = 'rgb(255,105,97)'
 
     x_pos = [p for p in x if p >= 0]
     x_neg = [p for p in x if p < 0]
@@ -138,24 +120,10 @@ def define_hist(x, cat):
                         ),
                     showlegend=False,
                     bargap=0.01
-    # legend=Legend(
-    #     x=0, 
-    #     y=1   # legend at upper left corner of plot
-    # ),
-    # plot_bgcolor='#EFECEA'   # set plot color to grey
     ) 
 
     fig = Figure(data=data, layout=layout)
     return fig
-
-# @app.route('/topic/detail', methods=['POST'])
-# def detail():
-#     rest_name = todo #request.form['user_input']
-#     category = request.a['category']
-#     # rest_link = coll.find({'rest_name': rest_name}, {'url': 1, '_id': 0})
-#     rest_link = 'http://www.opentable.com/lardoise'
-#     return render_template('result_detail.html', rest_name=rest_name,
-#                            rest_link=rest_link, category=category)
 
 # INFO PAGE
 #============================================

@@ -90,7 +90,8 @@
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           {% block content%}
-          <h1 class="page-header">{{rest_name}}: {{rating}}/5</h1>
+          <h1 class="page-header">{{rest_name}}</h1>
+          For information: this restaurant is rated: {{rating}}/5
           <a href="#Food"></a>
           <div class="container-fluid"  id="Food">
             <h2 class="row">Food snippets</h2>
@@ -101,10 +102,10 @@
             </div>
             
             <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table">
               <tbody>
                 {% for t in sentiments['Food']%}
-                <tr>
+                <tr class={{"danger" if t[0][0] < 0}}>
                   <td>{{t[1]}}</td>
                 </tr>
                 {% endfor %}
@@ -123,10 +124,10 @@
             </div>
 
             <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table">
               <tbody>
                 {% for t in sentiments['Service']%}
-                <tr>
+                <tr class={{"danger" if t[0][0] < 0}}>
                   <td>{{t[1]}}</td>
                 </tr>
                 {% endfor %}
@@ -145,10 +146,10 @@
             </div>
 
             <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table">
               <tbody>
                 {% for t in sentiments['Ambience']%}
-                <tr>
+                <tr class={{"danger" if t[0][0] < 0}}>
                   <td>{{t[1]}}</td>
                 </tr>
                 {% endfor %}
@@ -168,10 +169,10 @@
             </div>
 
             <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table">
               <tbody>
                 {% for t in sentiments[cat]%}
-                <tr>
+                <tr class={{"danger" if t[0][0] < 0}}>
                   <td>{{t[1]}}</td>
                 </tr>
                 {% endfor %}

@@ -71,92 +71,6 @@ def model_initializing(data_file, model_file, verbose=True):
         print 'Building model in %3.f seconds' % (toc - tic)
 
 
-def build_results(rest_name, base, base_fig=None, verbose=True, export=False):
-    '''
-    INPUT: string, string, string, [boolean, boolean]
-    OUTPUT: dictionary, dictionary
-
-    This function uses an initialized TopicExtraction model
-    and a dataset to perform latent feature extraction and
-    sentiment analysis on this dataset. It returns a dictionary
-    of sentences inedxed by category and a dictionary of sentiment
-    output indexed by category.
-    The optional verbose boolean controls verbosity.
-    The optional export boolean controls whether sentence categorization
-    and sentiments are pickled.
-    '''
-    # paths have to be written from the front_end/app/ viewpoint
-    df = pd.read_csv(base + 'df_clean3a.csv')
-    # df = pd.read_pickle(base + 'df_clean2a.pkl')
-    texts = df['review']
-
-    model_filename = base + 'te_3a_extraSW.pkl'
-    te = dill.load(open(model_filename, 'rb'))
-    categories = Categories()
-    special = {'Food', 'Service', 'Ambience'}
-
-    sent_analyzer = BlobSentimentAnalysis()
-
-    texts = df[df['rest_name'] == rest_name]['review'].values
-    rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
-
-    if verbose:
-        print 'Running top_cat...'
-    tic = timeit.default_timer()
-    top_cat = te.top_categories(texts, cat=categories)
-    for c in special:
-        if c not in top_cat:
-            # top_cat = np.append(top_cat, c)
-            top_cat.append(c)
-    if verbose:
-        print top_cat
-    tac = timeit.default_timer()
-    if verbose:
-        print 'Finished top_cat in %.3f seconds' % (tac - tic)
-
-    sentences = {}
-    sentiments = {}
-    if verbose:
-        print 'Looping over categories...'
-    tic = timeit.default_timer()
-    for c in top_cat:
-        if base_fig:
-            cloud_name = '%d_%s' % (rid, c)
-            cloud_name = base_fig + cloud_name
-            print cloud_name
-            te.extract_onecat_topwords(texts, c, cloud_name, base_fig)
-        # else:
-        #     te.extract_onecat_topwords(texts, c)
-        sentences[c] = te.extract_onecat_sentences(texts, c, token=False)
-        sentiments[c] = sent_analyzer.sentiment_sentences(sentences[c])
-    tac = timeit.default_timer()
-    if verbose:
-        print 'End looping in %.3f seconds' % (tac - tic)
-
-    if export:
-        tic = timeit.default_timer()
-        filename = base + ('%d_snippets.csv' % rid)
-        sent = pd.DataFrame([[c, sent] for c, v in sentences.iteritems()
-                            for sent in v])
-        sent.to_csv(filename)
-        tac = timeit.default_timer()
-        if verbose:
-            print 'Finished exporting sentences in %.3f seconds' % (tac - tic)
-
-        tic = timeit.default_timer()
-        filename = base + ('%d_sentiments.csv' % rid)
-        sent = pd.DataFrame([[c, dic] for c, v in
-                            sentiments.iteritems() for dic in v])
-        sent.to_csv(filename)
-        tac = timeit.default_timer()
-        if verbose:
-            print 'Finished exporting sentiments in %.3f seconds' % (tac - tic) 
-
-        top_cat = [item for item in top_cat if item not in {'Food', 'Service', 
-                   'Ambience'}]    
-
-    return sentiments
-
 def example_from_backend():
     '''
     INPUT: None
@@ -166,17 +80,13 @@ def example_from_backend():
     and sentiment analysis from the back_end folder.
     '''
     base = '../front_end/data/'
-    # base = '../../data/sentiments_AWS/'
     base_fig = '../front_end/app/static/img/'
-    # df = pd.read_pickle(base + 'df_clean2a.pkl')
     df = pd.read_csv(base + 'df_clean3a.csv')
 
     print df.shape
 
     rest_names = df['rest_name'].unique()
-    # rest_names = ["Harris'"]
-    # rest_names = ["Aliment"]
-
+    
     calculated_rid = set([])
     cnt = 0
 
@@ -190,16 +100,7 @@ def example_from_backend():
             print calculated_rid
             print len(calculated_rid)
             sentiments = build_results2(rest_name, base, export=True)
-            # sentences, sentiments = build_results2(rest_name, base, export=True)
-
-            # for cat, sent in sentences.iteritems():
-            #     print cat
-            #     print sent
-
-            # for cat, sent in sentiments.iteritems():
-            #     print cat
-            #     print sent 
-
+            
 
 # -----------------------------------------------------------------------------
 # SENTIMENT DISTRIBUTION

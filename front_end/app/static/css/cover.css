@@ -15,7 +15,7 @@ a:hover {
 .btn-default:focus {
   color: #fff;/*#871414;*//*#3c1414;*//*#993333;*//*##330099;#333*/
   text-shadow: none; /* Prevent inheritence from `body` */
-  background-color: #071607;/*#2c1608;*/
+  background-color: #00008b;/*#2c1608;*/
   border: 1px solid #000;
 }
 
@@ -27,16 +27,16 @@ a:hover {
 html,
 body {
   height: 100%;
-  background-color: #333;/*#993333;*//*#330099*/
+  background-color: #cb99c9;/*#333;*//*#993333;*//*#330099*/
   position: relative;
-  background: url(../img/SFrestaurant.jpg) scroll 0px 100% / cover transparent; no-repeat center center fixed; 
+  background: url(../img/le_critic.png) scroll 0px / cover transparent; no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
 body {
-  color: #071607;/*#321414;*//*#143c3c;*//*#b31b1b;*//*#100c08;*//*#004040;*//*#778899;*//*#bc987e;*//*#fff;*/
+  color: #00008b;/*#071607;*//*#321414;*//*#143c3c;*//*#b31b1b;*//*#100c08;*//*#004040;*//*#778899;*//*#bc987e;*//*#fff;*/
   text-align: center;
   text-shadow: 0 1px 3px rgba(0,0,0,.5);
 }
@@ -84,21 +84,29 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #03c03c;/*#495661;*/ /* IE8 proofing */
+  color: #00008b;/*#495661;*/ /* IE8 proofing */
   /*color: rgba(255,255,255,.75);*/
   border-bottom: 2px solid transparent;
 }
-.masthead-nav > li > a:hover,
+.masthead-nav > li > a:hover{
+  background-color: transparent;
+  color: #fff;
+  border-bottom-color: #fff;
+}
 .masthead-nav > li > a:focus {
   background-color: transparent;
   border-bottom-color: #a9a9a9;
   border-bottom-color: rgba(255,255,255,.25);
 }
 .masthead-nav > .active > a,
-.masthead-nav > .active > a:hover,
 .masthead-nav > .active > a:focus {
-  color: #03c03c;/*#333c44;*/
-  border-bottom-color: #03c03c;
+  color: #00008b;;/*#333c44;*/
+  border-bottom-color: #00008b;;
+}
+
+.masthead-nav > .active > a:hover{
+  color: #fff;;/*#333c44;*/
+  border-bottom-color: #fff;;
 }
 
 @media (min-width: 768px) {

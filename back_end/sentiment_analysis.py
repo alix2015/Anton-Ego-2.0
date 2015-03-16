@@ -1,11 +1,6 @@
-import numpy as np 
-import pandas as pd 
 from itertools import izip
-import matplotlib.pyplot as plt 
-from wordcloud import WordCloud
 from textblob import TextBlob
 # from textblob.sentiments import NaiveBayesAnalyzer
-import dill
 import timeit
 
 
@@ -28,9 +23,6 @@ class BlobSentimentAnalysis(object):
         #NaiveBayesAnalyzer way too slow: using PatternAnalyzer instead
         blob = TextBlob(sentence) 
         sentiment = blob.sentiment
-        # pos = sentiment.polarity > 0
-        # return (pos, round(sentiment.polarity, 2),
-        #         round(sentiment.subjectivity, 2))
         return round(sentiment.polarity, 2), round(sentiment.subjectivity, 2)
 
     def sentiment_sentences(self, sentences, n=5):
@@ -53,20 +45,4 @@ class BlobSentimentAnalysis(object):
         answ = [tup for tup in izip(sentiments, sentences)]
         answ.sort(key=lambda t: -t[0][0])
         return answ
-        # return [{'polarity': t[0][0], 'subjectivity': t[0][1], 'sentence': t[1]}
-        #         for t in izip(sentiments, sentences)]
-        # sentiment = np.array(sentiment)
-
-        # #
-        # idx_pos = np.argsort(sentiment[0, :])[-1:-(n+1):-1]
-        # idx_neg = np.argsort(sentiment[0, :])[:n]
-        # idx_subj = np.argsort(sentiment[1, :])[-1:-(n+1):-1]
-        # pos = [sentences[i] for i in idx_pos]
-        # neg = [sentences[i] for i in idx_neg]
-        # subj = [sentences[i] for i in idx_subj]
-
-        # pos = [tup for tup in izip(sentiment[0, idx_pos], pos)]
-        # neg = [tup for tup in izip(sentiment[0, idx_neg], neg)]
-        # subj = [tup for tup in izip(sentiment[1, idx_subj], subj)]
-
-        # return [tup for tup in izip(pos, neg, subj)]
+        
