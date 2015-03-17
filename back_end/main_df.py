@@ -1,5 +1,5 @@
-import numpy as np 
-import pandas as pd 
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from categories import Categories
 from topics import TopicExtraction
@@ -25,18 +25,16 @@ def build_model(df, n_topics, ngram_range, max_words, max_iter, model_filename,
 
     This functions uses the data in df to initialize a TopicExtraction
     '''
-    
+
     rest_names = df['rest_name'].dropna().unique().tolist()
     print 'Number of restaurants: %d' % len(rest_names)
-    te = TopicExtraction(rest_names=rest_names, n_topics=n_topics, sentence=True,
-                         ngram_range=ngram_range, max_words=max_words,
-                         max_iter=max_iter)
-
+    te = TopicExtraction(rest_names=rest_names, n_topics=n_topics,
+                         sentence=True, ngram_range=ngram_range,
+                         max_words=max_words, max_iter=max_iter)
 
     if top_filename:
         top_words = te.extract_top_words(df['review'], top_n=15,
                                          top_filename=top_filename)
-
     else:
         te.fit_transform(df['reviews'])
 
@@ -56,7 +54,7 @@ def model_initializing(data_file, model_file, verbose=True):
     using the data loaded from data_file pickle file, outputting it
     in model_filename out. The optional boolean input switches the verbosity.
     '''
-    
+
     df = pd.read_csv(data_file)
     texts = df['review']
 
@@ -66,7 +64,7 @@ def model_initializing(data_file, model_file, verbose=True):
     max_iter = 400
 
     top_filename = '../../data/te_3a_20_%d_%dgram_max_%d_100_extraStopW.txt' %\
-                    (n_topics, ngram_range[1], max_words)
+                   (n_topics, ngram_range[1], max_words)
 
     tic = timeit.default_timer()
     te = build_model(df, n_topics, ngram_range, max_words, max_iter,
@@ -78,6 +76,7 @@ def model_initializing(data_file, model_file, verbose=True):
 # -----------------------------------------------------------------------------
 # SENTIMENT DISTRIBUTION
 # -----------------------------------------------------------------------------
+
 
 def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
     '''
@@ -136,7 +135,7 @@ def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
         #     te.extract_onecat_topwords(texts, c)
         sentences[c] = te.extract_onecat_sentences(texts, c, token=False)
         sentiments[c] = sent_analyzer.sentiment_sentences(sentences[c])
-        
+
         if base_fig:
             for c in sentiments:
                 plt.figure(figsize=(10, 8))
@@ -162,16 +161,17 @@ def build_results2(rest_name, base, base_fig=None, verbose=True, export=False):
         sent.to_csv(filename)
         tac = timeit.default_timer()
         if verbose:
-            print 'Finished exporting sentiments in %.3f seconds' % (tac - tic) 
+            print 'Finished exporting sentiments in %.3f seconds' % (tac - tic)
 
-        top_cat = [item for item in top_cat if item not in {'Food', 'Service', 
-                   'Ambience'}]    
+        top_cat = [item for item in top_cat if item not in {'Food', 'Service',
+                   'Ambience'}]
 
     return sentiments
 
 # -----------------------------------------------------------------------------
 # EXAMPLE OF USE
 # -----------------------------------------------------------------------------
+
 
 def example_from_backend():
     '''
@@ -188,7 +188,7 @@ def example_from_backend():
     print df.shape
 
     rest_names = df['rest_name'].unique()
-    
+
     calculated_rid = set([])
     cnt = 0
 
@@ -202,7 +202,7 @@ def example_from_backend():
             print calculated_rid
             print len(calculated_rid)
             sentiments = build_results2(rest_name, base, export=True)
-            
+
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 

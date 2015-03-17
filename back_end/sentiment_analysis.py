@@ -7,7 +7,7 @@ import timeit
 class BlobSentimentAnalysis(object):
     def __init__(self, verbose=False):
         self.verbose = verbose
-        
+
     def sentiment(self, sentence):
         '''
         INPUT: BlobSentimentAnalysis object, string
@@ -20,8 +20,8 @@ class BlobSentimentAnalysis(object):
         +1. the most subjective.
         Based on PatternAnalyzer http://www.clips.ua.ac.be/pattern
         '''
-        #NaiveBayesAnalyzer way too slow: using PatternAnalyzer instead
-        blob = TextBlob(sentence) 
+        # NaiveBayesAnalyzer way too slow: using PatternAnalyzer instead
+        blob = TextBlob(sentence)
         sentiment = blob.sentiment
         return round(sentiment.polarity, 2), round(sentiment.subjectivity, 2)
 
@@ -45,4 +45,3 @@ class BlobSentimentAnalysis(object):
         answ = [tup for tup in izip(sentiments, sentences)]
         answ.sort(key=lambda t: -t[0][0])
         return answ
-        

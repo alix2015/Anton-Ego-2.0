@@ -2,79 +2,66 @@
 Restaurant reviews analysis and aggregation
 
 #### Summary
-Restaurant quantitative rating is carried out according to different categories
-(typically food, service, atmosphere, etc.). Qualitative rating on the other
-hand gathers all these various features in a single text.  
-In this project, we aim at extracting the relevant snippets of a review
-for each category we are interested in. Various levels of granularity
-can be implemented. Using this categorization, we can highlight the most
-prominent qualities reported in the reviews for each category.
-Another aspect of qualitative reviews is sentiment. After categorizing
-the snippets, we can extract sentiment to enrich the quantitative rating.
+Restaurant quantitative rating tends to oversimplify the assessment of
+restaurants. Even if carried out for different categories
+(typically food, service, atmosphere, etc.).
+Qualitative rating on the other hand gathers much more detailed information.
+Yet how can we process roughly 250 reviews per restaurants for several thousands
+of them in the sole city of San Francisco?
+| *Water, water everywhere*  
+| *Nor any drop to drink*  
+| **Coleridge**, The Rime of the Ancient Mariner
 
+In this project, you can find modules to extract the relevant
+snippets from a body of reviews according to categories of interest.
+You can also perform sentiment analysis on the extracted snippets
+with the provided module.
 
-#### Motivation
-The information burried in written reviews is a still under utilized bounty,
-both by potential customers and reviewed businesses. What we propose here
-is a way to take better advantage of reviews to refine the fast digestion
-of both quantitative and qualitative restaurant reviews.  
-Furthermore, sentiment analysis enables us to better contextualize quantitative
-rating.
-
-
-<!-- #### Deliverables
-The final deliverable of this project is a UI that will provide users with
-a contextualization of numeric ratings in terms of pregnant features within
-categories and salient associated sentiments.
- -->
 
 #### Data sources
-For this project, we use data from [Open Table] (http://www.opentable.com),
-which has detailled rating. Next, using [Yelp] (http://www.yelp.com) reviews,
-we calculate the detailled rating based on the sentiment analysis benchmarked
-with Open Table reviews.
+For this project, I have used data from [Open Table] (http://www.opentable.com),
+which has detailled rating. I illustrate here the analysis with a small
+subset of the obtained data.
+
+
+#### Installation
+You can install this package by cloning the repo.
+Requirements:
+* The data pipeline is built using MongoDB
+* Regular Python data science package
+  (such as provided with [Anaconda] (http://continuum.io/downloads))
+
+* ``dill``
+    ```
+    pip install dill
+    ```
+* [TextBlob] (http://textblob.readthedocs.org/en/dev/)
+
+* The plotting in the front end is currently done using
+  [Plotly] (https://plot.ly) but will soon be upgraded to d3
 
 
 #### Description
-This is still under construction.
+Hereafter is a description of the different modules.
+The project is organized in two parts:
+* back end
+* front end
 
-##### Scraping
-This module (left during the construction phase) is used to aquire data
-from [Open Table] (http://www.opentable.com).
+##### Obtaining the data
+In the folder [``data_acquisition_cleaning``] (https://github.com/alix2015/the-critic/tree/master/back_end/data_acquisition_cleaning),
+functions to acquire restaurant reviews from [Open Table] (http://www.opentable.com)
+are provided, as well as cleaning them. 
 
 ##### Extracting data
 Extracting the data from MongoDB and transforming it in a usable format.
 
-##### Exploratory Data Analysis (EDA)
-Gathering basic statistics on the reviews.
-
-##### Processing data
-The core of the work: TFIDF vectorization, NMF factorization to extract
-latent topics in the reviews, (so far) hand-labelling and grouping them
-by category, calling sentiment analysis module.
+##### Latent feature extraction and categorization
+For this part, I have used TFIDF vectorization, NMF factorization to extract
+latent topics in the reviews. For both, I have used scikit-learn implementation.
+Latent features are hand-labelled to form categories.
+The relevant modules are ``topics`` and ``categories``.
 
 ##### Sentiment analysis
-Still very rough
-
-<!-- ### Process
-A high-level description of the investigation process is the following:
-1.	Acquiring the data, explore, and clean it.  
-	In particular, very short reviews will be discarded to reduce noise.
-	Subdivision of the data may be useful: we will assess the relevance
-	of this practice.
-2.	Using the set of reviews hence extracted, we will perform topic
-	extraction (e. g. with non-negative matrix factorization).
-3.	Labelling the extracted topics into categories of interest.
-4.	Parse the review into snippets (the precise definition of which
-	will be evaluated) and calculate the weight vector of each snippet
-	in the topic space.
-5.	Extracting for each category the most prominent features hierarchically
-	ordered alng the granularity deduced in 2.
-6.	Further proceed to a sentiment analysis on each snippet, hence producing
-	a qualitative rating.
-7.	Building a UI to show results (e. g. using Flask)
-
-Nota: 3-4-5-7 can be iteratively carried out to deliver intermediate working
-products. 6 can be added after a few iterations and 6-7 can then be further
-improved. The leading principle is to regularly deliver working products
-along the development process. -->
+I have used TextBlob for sentiment analysis. The analysis is based
+on building the dependency tree of sentences. Polarity and subjectivity
+are provided by TextBlob. ``sentiment_anlysis`` is the relevant module.

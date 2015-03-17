@@ -51,9 +51,9 @@ def predict_page():
     rest_name = df[mask]['rest_name'].values[0]
     rest_link = df[mask]['url'].values[0]
     rating = '%.2f' % df[mask]['rating'].mean()
-    rating_food = '%.2f' %  df[mask]['food_rating'].mean()
-    rating_service = '%.2f' %  df[mask]['service_rating'].mean()
-    rating_ambience = '%.2f' % df[mask]['ambience_rating'].mean()
+    # rating_food = '%.2f' %  df[mask]['food_rating'].mean()
+    # rating_service = '%.2f' %  df[mask]['service_rating'].mean()
+    # rating_ambience = '%.2f' % df[mask]['ambience_rating'].mean()
 
     sentiments = build_results2(rest_name, base, verbose=False)
     plot_url = {}
@@ -63,19 +63,15 @@ def predict_page():
     
     special = {'Food', 'Service', 'Ambience'}
     top = [cat for cat in sentiments.keys() if cat not in special]
-    cloud_food = base_fig + rid + '_food.png'
-    cloud_service = base_fig + rid +'_service.png'
-    cloud_ambience = base_fig + rid +'_ambience.png'
-    clouds = [base_fig + rid + '_' + cat + '.png' for cat in top]
 
     return render_template('result3a.html', rest_name=rest_name,
                            plot_url=plot_url,
                            rest_names=rest_names, restos=restos,
                            rest_link=rest_link, top=top,
-                           rating=rating, sentiments=sentiments,
-                           rating_food=rating_food,
-                           rating_service=rating_service,
-                           rating_ambience=rating_ambience)
+                           rating=rating, sentiments=sentiments)
+                           # rating_food=rating_food,
+                           # rating_service=rating_service,
+                           # rating_ambience=rating_ambience)
     
 
 def define_hist(x, cat):
@@ -90,35 +86,23 @@ def define_hist(x, cat):
     x_neg = [p for p in x if p < 0]
 
     data = Data([Histogram(x=x_pos, marker=Marker(color=color_pos),
-                  name="<b>{}</b>".format(cat),
-                  xbins=XBins(start=xbins_middle, end=xbins_end,
-                              size=xbin_size)),
-                Histogram(x=x_neg, marker=Marker(color=color_neg),
-                  name="<b>{}</b>".format(cat),
-                  xbins=XBins(start=xbins_start, end=xbins_middle,
-                              size=xbin_size)),
-            ])
+                           name="<b>{}</b>".format(cat),
+                           xbins=XBins(start=xbins_middle, end=xbins_end,
+                           size=xbin_size)),
+                 Histogram(x=x_neg, marker=Marker(color=color_neg),
+                           name="<b>{}</b>".format(cat),
+                           xbins=XBins(start=xbins_start, end=xbins_middle,
+                           size=xbin_size))])
 
     x_range = [-1, 1]
 
-    axis_style=dict(tickfont=Font(size=14),   # font size (default is 12)
-                    titlefont=Font(size=14),  # title font size (default is 12)
-                    zeroline=False,           # remove thick zero line
-                    autotick=True            
-                    )
+    axis_style=dict(tickfont=Font(size=14), titlefont=Font(size=14),
+                    zeroline=False, autotick=True)
 
-    layout = Layout(
-                    xaxis=XAxis(axis_style,               # style options
-                                range=x_range,
-                                title='<b>Sentiment [-1 to +1]</b>'
-                                ),  
-                    yaxis=YAxis(
-                        axis_style,               # sytle options
-                        title='<b>Snippet count</b>'      # y-axis title 
-                        ),
-                    showlegend=False,
-                    bargap=0.01
-    ) 
+    layout = Layout(xaxis=XAxis(axis_style, range=x_range,
+                                title='<b>Sentiment [-1 to +1]</b>'),  
+                    yaxis=YAxis(axis_style,title='<b>Snippet count</b>'),
+                    showlegend=False, bargap=0.01) 
 
     fig = Figure(data=data, layout=layout)
     return fig

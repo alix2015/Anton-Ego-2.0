@@ -61,7 +61,6 @@ class Categories(object):
         self.dic['Salad'] = {20}
         self.dic['Drinks'] = {47}
         self.dic['Dessert'] = {88}
-   
 
     def _tojson(self, dictionary, filename):
         with open(filename, 'wb') as f:
