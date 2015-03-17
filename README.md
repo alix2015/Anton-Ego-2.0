@@ -1,6 +1,6 @@
 # The Critic
 Restaurant reviews analysis and aggregation. The Critic lives
-[here] (http://the-critic.net)
+[here](http://the-critic.net)
 
 #### Summary
 Restaurant quantitative rating tends to oversimplify the assessment of
@@ -21,7 +21,7 @@ with the provided module.
 
 
 #### Data sources
-For this project, I have used data from [Open Table] (http://www.opentable.com),
+For this project, I have used data from [Open Table](http://www.opentable.com),
 which has detailled rating. I illustrate here the analysis with a small
 subset of the obtained data.
 
@@ -33,7 +33,7 @@ git clone https://github.com/alix2015/the-critic.git
 ```
 
 To run an example (provided you have obtained some data as
-per the description [infra] (#obtaining_data):
+per the description [infra](#obtaining_data):
 ```
 python main_df.py
 ```
@@ -41,16 +41,16 @@ python main_df.py
 Requirements:
 * The data pipeline is built using MongoDB
 * Regular Python data science package
-  (such as provided with [Anaconda] (http://continuum.io/downloads))
+  (such as provided with [Anaconda](http://continuum.io/downloads))
 
 * ``dill``
     ```
     pip install dill
     ```
-* [TextBlob] (http://textblob.readthedocs.org/en/dev/)
+* [TextBlob](http://textblob.readthedocs.org/en/dev/)
 
 * The plotting in the front end is currently done using
-  [Plotly] (https://plot.ly)
+  [Plotly](https://plot.ly)
 
 
 #### Description
@@ -59,9 +59,9 @@ The project is organized in two parts:
 * back end
 * front end
 
-##### Obtaining the data [obtaining_data]
-In the folder [``data_acquisition_cleaning``] (https://github.com/alix2015/the-critic/tree/master/back_end/data_acquisition_cleaning),
-functions to acquire restaurant reviews from [Open Table] (http://www.opentable.com)
+##### Obtaining the data [obtaining_data] #####
+In the folder [``data_acquisition_cleaning``](https://github.com/alix2015/the-critic/tree/master/back_end/data_acquisition_cleaning),
+functions to acquire restaurant reviews from [Open Table](http://www.opentable.com)
 are provided, as well as cleaning them. 
 
 ##### Extracting data
