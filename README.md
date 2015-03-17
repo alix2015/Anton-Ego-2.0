@@ -27,6 +27,10 @@ subset of the obtained data.
 
 #### Installation
 You can install this package by cloning the repo.
+```
+git clone https://github.com/alix2015/the-critic.git
+```
+
 Requirements:
 * The data pipeline is built using MongoDB
 * Regular Python data science package
