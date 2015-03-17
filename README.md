@@ -33,7 +33,7 @@ git clone https://github.com/alix2015/the-critic.git
 ```
 
 To run an example (provided you have obtained some data as
-per the description [infra](#obtaining_data):
+per the description infra):
 ```
 python main_df.py
 ```
@@ -59,7 +59,7 @@ The project is organized in two parts:
 * back end
 * front end
 
-##### Obtaining the data [obtaining_data] #####
+##### Obtaining the data
 In the folder [``data_acquisition_cleaning``](https://github.com/alix2015/the-critic/tree/master/back_end/data_acquisition_cleaning),
 functions to acquire restaurant reviews from [Open Table](http://www.opentable.com)
 are provided, as well as cleaning them. 
@@ -77,3 +77,10 @@ The relevant modules are ``topics`` and ``categories``.
 I have used TextBlob for sentiment analysis. The analysis is based
 on building the dependency tree of sentences. Polarity and subjectivity
 are provided by TextBlob. ``sentiment_anlysis`` is the relevant module.
+
+##### Front end
+The front end, which is visible [here](http://the-critic.net), is organized
+as a simple site to look up restaurants in the sample set and vizualize
+the sentiment distribution and associated snippets for the three main
+categories (food, service, ambience) as well as for other categories
+calculated as important for the chosen restaurant.
