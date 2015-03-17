@@ -31,6 +31,11 @@ You can install this package by cloning the repo.
 git clone https://github.com/alix2015/the-critic.git
 ```
 
+To run an example:
+```
+python main_df.py
+```
+
 Requirements:
 * The data pipeline is built using MongoDB
 * Regular Python data science package
