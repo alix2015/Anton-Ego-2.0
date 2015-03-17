@@ -190,12 +190,9 @@ def example_from_backend():
     rest_names = df['rest_name'].unique()
 
     calculated_rid = set([])
-    cnt = 0
-
+    
     for rest_name in rest_names:
         rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
-        if cnt > 5:
-            break
         if rid not in calculated_rid:
             cnt += 1
             calculated_rid.add(rid)

@@ -1,17 +1,18 @@
 # The Critic
-Restaurant reviews analysis and aggregation
+Restaurant reviews analysis and aggregation. The Critic lives
+[here] (http://the-critic.net)
 
 #### Summary
 Restaurant quantitative rating tends to oversimplify the assessment of
 restaurants. Even if carried out for different categories
 (typically food, service, atmosphere, etc.).
 Qualitative rating on the other hand gathers much more detailed information.
-Yet how can we process roughly 250 reviews per restaurants for several thousands
-of them in the sole city of San Francisco?
+Yet how can we process an average of 250 reviews per restaurants for several
+thousands of them in the sole city of San Francisco?
 
-| *Water, water everywhere*  
-| *Nor any drop to drink*  
-| **Coleridge**, The Rime of the Ancient Mariner
+ *Water, water everywhere*  
+ *Nor any drop to drink*  
+ **Coleridge**, The Rime of the Ancient Mariner
 
 In this project, you can find modules to extract the relevant
 snippets from a body of reviews according to categories of interest.
@@ -49,7 +50,7 @@ Requirements:
 * [TextBlob] (http://textblob.readthedocs.org/en/dev/)
 
 * The plotting in the front end is currently done using
-  [Plotly] (https://plot.ly) but will soon be upgraded to d3
+  [Plotly] (https://plot.ly)
 
 
 #### Description

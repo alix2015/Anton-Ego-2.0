@@ -34,7 +34,7 @@ def home():
 # ============================================
 @app.route('/submit_page')
 def submission_page():
-    return render_template('submit2.html',
+    return render_template('submit.html',
                            restos=restos)
 
 
@@ -59,7 +59,7 @@ def predict_page():
     special = {'Food', 'Service', 'Ambience'}
     top = [cat for cat in sentiments.keys() if cat not in special]
 
-    return render_template('result3a.html', rest_name=rest_name,
+    return render_template('result.html', rest_name=rest_name,
                            plot_url=plot_url,
                            rest_names=rest_names, restos=restos,
                            rest_link=rest_link, top=top,
@@ -104,14 +104,14 @@ def define_hist(x, cat):
 # ============================================
 @app.route('/info')
 def info_page():
-    return render_template('info2.html')
+    return render_template('info.html')
 
 
 # INFO PAGE
 # ============================================
 @app.route('/contact')
 def contact_page():
-    return render_template('contact2.html')
+    return render_template('contact.html')
 
 
 if __name__ == '__main__':

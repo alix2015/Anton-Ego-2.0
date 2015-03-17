@@ -1,6 +1,5 @@
 from itertools import izip
 from textblob import TextBlob
-# from textblob.sentiments import NaiveBayesAnalyzer
 import timeit
 
 
@@ -20,7 +19,6 @@ class BlobSentimentAnalysis(object):
         +1. the most subjective.
         Based on PatternAnalyzer http://www.clips.ua.ac.be/pattern
         '''
-        # NaiveBayesAnalyzer way too slow: using PatternAnalyzer instead
         blob = TextBlob(sentence)
         sentiment = blob.sentiment
         return round(sentiment.polarity, 2), round(sentiment.subjectivity, 2)
@@ -38,7 +36,7 @@ class BlobSentimentAnalysis(object):
         for sentence in sentences:
             sentiments.append(self.sentiment(sentence))
             if self.verbose:
-                if not (cnt % 10):
+                if cnt % 10 == 0:
                     print '%d sentences analysed' % (cnt + 1)
             cnt += 1
         # Sort in decreasing order of sentiment

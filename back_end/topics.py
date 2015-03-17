@@ -141,25 +141,27 @@ class TopicExtraction(object):
                                '../data/nouncloud_%d.png' % topic)
 
         if top_filename:
-            with open(top_filename, 'w') as f:
-                f.write('n_gram: %d, %d' % (self.ngram_range[0],
-                        self.ngram_range[1]))
-                f.write('\n')
-                f.write('n_topics: %d' % self.n_topics)
-                f.write('\n')
-                f.write('-------------------------')
-                f.write('\n')
-                for topic in top_words:
-                    f.write('Topic %d' % topic)
-                    f.write('\n')
-                    for word in top_words[topic]:
-                        f.write(word)
-                        f.write('\n')
-                    f.write('-------------------------')
-                    f.write('\n')
-            f.close()
+            self.write_to_file(top_filename)
 
         return top_words
+
+    def write_to_file(self, filename):
+        with open(top_filename, 'w') as f:
+            f.write('n_gram: %d, %d' % (self.ngram_range[0],
+                    self.ngram_range[1]))
+            f.write('\n')
+            f.write('n_topics: %d' % self.n_topics)
+            f.write('\n')
+            f.write('-------------------------')
+            f.write('\n')
+            for topic in top_words:
+                f.write('Topic %d' % topic)
+                f.write('\n')
+                for word in top_words[topic]:
+                    f.write(word)
+                    f.write('\n')
+                f.write('-------------------------')
+                f.write('\n')
 
     def cloud_fig(self, top_words, filename):
         '''
