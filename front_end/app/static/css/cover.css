@@ -13,9 +13,9 @@ a:hover {
 .btn-default,
 .btn-default:hover,
 .btn-default:focus {
-  color: #fff;/*#871414;*//*#3c1414;*//*#993333;*//*##330099;#333*/
+  color: #fff;
   text-shadow: none; /* Prevent inheritence from `body` */
-  background-color: #00008b;/*#2c1608;*/
+  background-color: #00008b;
   border: 1px solid #000;
 }
 
@@ -29,14 +29,14 @@ body {
   height: 100%;
   position: relative;
   background: url(../img/le_critic.png) scroll 0px; no-repeat center center fixed;
-  background-color: #cb99c9;/*#333;*//*#993333;*//*#330099*/
+  background-color: #cb99c9;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
 body {
-  color: #00008b;/*#071607;*//*#321414;*//*#143c3c;*//*#b31b1b;*//*#100c08;*//*#004040;*//*#778899;*//*#bc987e;*//*#fff;*/
+  color: #00008b;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0,0,0,.5);
 }
@@ -84,7 +84,7 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #00008b;/*#495661;*/ /* IE8 proofing */
+  color: #00008b;
   /*color: rgba(255,255,255,.75);*/
   border-bottom: 2px solid transparent;
 }
@@ -100,13 +100,13 @@ body {
 }
 .masthead-nav > .active > a,
 .masthead-nav > .active > a:focus {
-  color: #00008b;;/*#333c44;*/
+  color: #00008b;
   border-bottom-color: #00008b;;
 }
 
 .masthead-nav > .active > a:hover{
-  color: #fff;;/*#333c44;*/
-  border-bottom-color: #fff;;
+  color: #fff;
+  border-bottom-color: #fff;
 }
 
 @media (min-width: 768px) {

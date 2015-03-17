@@ -31,7 +31,8 @@ You can install this package by cloning the repo.
 git clone https://github.com/alix2015/the-critic.git
 ```
 
-To run an example:
+To run an example (provided you have obtained some data as
+per the description [infra] (#obtaining_data):
 ```
 python main_df.py
 ```
@@ -57,7 +58,7 @@ The project is organized in two parts:
 * back end
 * front end
 
-##### Obtaining the data
+##### Obtaining the data [obtaining_data]
 In the folder [``data_acquisition_cleaning``] (https://github.com/alix2015/the-critic/tree/master/back_end/data_acquisition_cleaning),
 functions to acquire restaurant reviews from [Open Table] (http://www.opentable.com)
 are provided, as well as cleaning them. 
