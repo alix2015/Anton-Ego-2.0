@@ -8,6 +8,7 @@ restaurants. Even if carried out for different categories
 Qualitative rating on the other hand gathers much more detailed information.
 Yet how can we process roughly 250 reviews per restaurants for several thousands
 of them in the sole city of San Francisco?
+
 | *Water, water everywhere*  
 | *Nor any drop to drink*  
 | **Coleridge**, The Rime of the Ancient Mariner
