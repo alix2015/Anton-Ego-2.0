@@ -32,8 +32,18 @@ You can install this package by cloning the repo.
 git clone https://github.com/alix2015/the-critic.git
 ```
 
-To run an example (provided you have obtained some data as
-per the description infra):
+Then, you need to start a Mongo server:
+```
+sudo mongod
+```
+You can then obtain data (feel free to scrape a subsample of pages):
+```
+cd back_end/data_acquisition_cleaning/
+python scraping_openTable.py
+python extract_data.py
+```
+
+To run an example, go back to ``back_end`` and run:
 ```
 python main_df.py
 ```

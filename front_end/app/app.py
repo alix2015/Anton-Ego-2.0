@@ -18,8 +18,8 @@ rest_names = [df[df['rid'] == int(r)]['rest_name'].unique()[0] for r in rid]
 restos = [t for t in izip(rid, rest_names)]
 restos.sort(key=lambda t: t[1])
 
-# PORT = 8888
-PORT = 80  # (AWS)
+PORT = 8888
+# PORT = 80  # (AWS)
 app = Flask(__name__)
 
 

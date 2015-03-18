@@ -141,12 +141,12 @@ class TopicExtraction(object):
                                '../data/nouncloud_%d.png' % topic)
 
         if top_filename:
-            self.write_to_file(top_filename)
+            self.write_to_file(top_filename, top_words)
 
         return top_words
 
-    def write_to_file(self, filename):
-        with open(top_filename, 'w') as f:
+    def write_to_file(self, filename, top_words):
+        with open(filename, 'w') as f:
             f.write('n_gram: %d, %d' % (self.ngram_range[0],
                     self.ngram_range[1]))
             f.write('\n')

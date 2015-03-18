@@ -194,7 +194,6 @@ def example_from_backend():
     for rest_name in rest_names:
         rid = df[df['rest_name'] == rest_name]['rid'].unique()[0]
         if rid not in calculated_rid:
-            cnt += 1
             calculated_rid.add(rid)
             print calculated_rid
             print len(calculated_rid)

@@ -17,8 +17,8 @@ class ExtractData(object):
         self.client = MongoClient()
         self.db = self.client.opentable
         # TODO: not harcoding the name of the collection
-        self.collection = self.db.review2
-        self.collectionOut = self.db.clean2a
+        self.collection = self.db.review3
+        self.collectionOut = self.db.clean3a
 
     def to_mongo(self):
         '''
@@ -181,7 +181,7 @@ def sampling_SF():
     Sampling restaurants in San Francisco, CA for the front end
     '''
     client = MongoClient()
-    coll = client.opentable.clean2a
+    coll = client.opentable.clean3a
 
     address = coll.distinct('address')
     parsed_address = [parse_address(a) for a in address]
@@ -203,5 +203,5 @@ def sampling_SF():
 
 
 if __name__ == '__main__':
-    # processing_tomongo()
+    processing_tomongo()
     sampling_SF()
