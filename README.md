@@ -48,6 +48,12 @@ To run an example, go back to ``back_end`` and run:
 python main_df.py
 ```
 
+The front end can be run as follows:
+```
+cd front_end/app/
+python app.py
+```
+
 Requirements:
 * The data pipeline is built using MongoDB
 * Regular Python data science package
